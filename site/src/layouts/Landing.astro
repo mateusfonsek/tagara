@@ -56,7 +56,12 @@ const ogImage = url(withBase(base, `og-${lang}.png`));
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={s.meta.ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      // Content is hidden for the reveal only while .js is set. If the page's module never runs
+      // (blocked or failed to download), drop .js after 3 s so nothing stays invisible.
+      document.documentElement.classList.add('js');
+      window.tgRevealFailsafe = setTimeout(() => document.documentElement.classList.remove('js'), 3000);
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">{s.nav.skip}</a>
@@ -74,6 +79,7 @@ const ogImage = url(withBase(base, `og-${lang}.png`));
     <Footer s={s} />
     <script>
       import { observeReveal } from '../scripts/reveal';
+      clearTimeout((window as Window & { tgRevealFailsafe?: number }).tgRevealFailsafe);
       observeReveal();
     </script>
   </body>
