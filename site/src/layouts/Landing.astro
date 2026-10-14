@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import nextFont from '../assets/fonts/AtkinsonHyperlegibleNext.woff2?url';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { strings } from '../i18n';
+import type { Lang } from '../i18n/types';
+import { localeHref, withBase } from '../lib/paths';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = strings[lang];
+const base = import.meta.env.BASE_URL;
+const site = Astro.site!;
+const url = (path: string) => new URL(path, site).href;
+const ptUrl = url(localeHref(base, 'pt'));
+const enUrl = url(localeHref(base, 'en'));
+const ogImage = url(withBase(base, `og-${lang}.png`));
+---
+<!doctype html>
+<html lang={s.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{s.meta.title}</title>
+    <meta name="description" content={s.meta.description} />
+    <link rel="canonical" href={lang === 'pt' ? ptUrl : enUrl} />
+    <link rel="alternate" hreflang="pt-BR" href={ptUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={ptUrl} />
+    <link rel="sitemap" href={withBase(base, 'sitemap-index.xml')} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafaf7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141613" />
+    <link rel="icon" href={withBase(base, 'favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={withBase(base, 'apple-touch-icon.png')} />
+    <link rel="preload" href={nextFont} as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tagara" />
+    <meta property="og:title" content={s.meta.title} />
+    <meta property="og:description" content={s.meta.description} />
+    <meta property="og:url" content={lang === 'pt' ? ptUrl : enUrl} />
+    <meta property="og:locale" content={s.ogLocale} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={s.meta.ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{s.nav.skip}</a>
+    <Header s={s} />
+    <main id="main">
+    </main>
+    <Footer s={s} />
+    <script>
+      import { observeReveal } from '../scripts/reveal';
+      observeReveal();
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -100px;
+    z-index: 100;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+</style>

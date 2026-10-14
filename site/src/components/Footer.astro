@@ -1,0 +1,55 @@
+---
+import BarsLogo from './BarsLogo.astro';
+import type { Strings } from '../i18n/types';
+import { RELEASES_URL, REPO_URL } from '../lib/constants';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+---
+<footer class="footer">
+  <div class="container footer__inner">
+    <p class="footer__brand"><BarsLogo size={20} /> Tagara · {s.footer.tagline}</p>
+    <ul class="footer__links">
+      <li><a href={REPO_URL}>{s.footer.source}</a></li>
+      <li><a href={RELEASES_URL}>{s.footer.releases}</a></li>
+      <li><a href={`${REPO_URL}/blob/main/LICENSE`}>{s.footer.license}</a></li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 40px;
+    border-top: 1px solid var(--line);
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer__links {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__links a {
+    color: inherit;
+  }
+</style>

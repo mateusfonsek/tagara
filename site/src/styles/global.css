@@ -1,0 +1,230 @@
+@import "../../../assets/design-tokens.css";
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("../assets/fonts/AtkinsonHyperlegibleNext.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Mono";
+  src: url("../assets/fonts/AtkinsonHyperlegibleMono.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+/* Site tokens on top of the brand tokens. Light and dark follow the system, like the app. */
+:root {
+  color-scheme: light dark;
+  interpolate-size: allow-keywords;
+  --bg: #fafaf7;
+  --bg-raised: #ffffff;
+  --bg-sunken: #f1f2ed;
+  --text: #1d201b;
+  --text-muted: #5b6156;
+  --line: rgb(47 51 44 / 0.12);
+  --accent: var(--tg-violeta);
+  --accent-text: var(--tg-violeta);
+  --on-accent: #ffffff;
+  --key-top: #ffffff;
+  --key-bottom: #eff0eb;
+  --key-edge: #c5c8bf;
+  --shadow: 0 1px 2px rgb(29 32 27 / 0.06), 0 16px 40px rgb(29 32 27 / 0.1);
+  --gutter: clamp(16px, 4vw, 32px);
+  --max: 1120px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141613;
+    --bg-raised: #1d201b;
+    --bg-sunken: #10120f;
+    --text: #f1f4ec;
+    --text-muted: #a4ab9d;
+    --line: rgb(241 244 236 / 0.12);
+    /* #8E5CC9 fails AA as small text on the dark background; the light violet passes. */
+    --accent-text: var(--tg-violeta-claro);
+    --key-top: #2d302a;
+    --key-bottom: #242721;
+    --key-edge: #0b0c0a;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.4);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--tg-font-marca);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--accent-text);
+  text-underline-offset: 0.2em;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+code,
+kbd {
+  font-family: var(--tg-font-transcricao);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.container {
+  width: min(100% - 2 * var(--gutter), var(--max));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: clamp(72px, 10vw, 128px);
+}
+
+.section--dark {
+  background: var(--tg-grafite);
+  color: var(--tg-sobre-grafite);
+  --text: var(--tg-sobre-grafite);
+  --text-muted: #b9c0b1;
+  --line: rgb(241 244 236 / 0.14);
+  --accent-text: var(--tg-violeta-claro);
+  --bg-raised: #383c34;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4.6vw, 3.25rem);
+  font-weight: 750;
+}
+
+.lead {
+  margin-top: 1rem;
+  max-width: 60ch;
+  font-size: 1.1875rem;
+  color: var(--text-muted);
+}
+
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--tg-radius-cartao);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--accent) 86%, black);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Reveal on scroll. Hidden only when JS runs, so the page is complete without it. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s var(--ease) var(--delay, 0ms),
+    transform 0.6s var(--ease) var(--delay, 0ms);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
