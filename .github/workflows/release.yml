@@ -1,11 +1,14 @@
 name: CI / Release
 
-# Every push to main runs the tests, builds Tagara.dmg and publishes it as a GitHub Release
-# (v<VERSION>.<run number>). Pull requests only test and build.
+# Every push to main that changes the app runs the tests, builds Tagara.dmg and publishes it as a
+# GitHub Release (v<VERSION>.<run number>). Site and docs changes are ignored. Pull requests only
+# test and build.
 on:
   push:
     branches: [main]
+    paths-ignore: ['site/**', 'docs/**', '.github/workflows/site.yml']
   pull_request:
+    paths-ignore: ['site/**', 'docs/**', '.github/workflows/site.yml']
   workflow_dispatch:
 
 permissions:

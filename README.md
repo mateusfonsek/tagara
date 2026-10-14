@@ -14,7 +14,7 @@ Ditado por voz para macOS que roda inteiro no seu Mac: sem nuvem, sem conta, sem
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-M1%E2%80%93M5-2F332C)](#requisitos)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-5B2A86)](LICENSE)
 
-[Baixar](https://github.com/mateusfonsek/tagara/releases/latest) · [Como funciona](#como-funciona) · [Compilar](#compilar-do-código) · [Contribuir](#contribuindo)
+[Site](https://mateusfonsek.github.io/tagara/) · [Baixar](https://github.com/mateusfonsek/tagara/releases/latest) · [Como funciona](#como-funciona) · [Compilar](#compilar-do-código) · [Contribuir](#contribuindo)
 
 </div>
 
