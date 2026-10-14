@@ -15,6 +15,8 @@ struct SettingsView: View {
                 Toggle("Sons ao começar e terminar", isOn: $controller.soundsEnabled)
             }
 
+            MicrophoneSection()
+
             Section {
                 LabeledContent("Tecla para falar") { Keycap(symbol: "⌥", label: "direito") }
                 Toggle("Toque duplo no ⌥ trava a gravação", isOn: $controller.handsFreeEnabled)
@@ -75,6 +77,36 @@ struct SettingsView: View {
         case .downloading: "baixando…"
         case .notDownloaded: "não baixado"
         case .failed: "com erro"
+        }
+    }
+}
+
+private struct MicrophoneSection: View {
+    @Environment(AppController.self) private var controller
+
+    var body: some View {
+        Section {
+            MicrophonePicker()
+        } header: {
+            Text("Microfone")
+        } footer: {
+            Text("Se o microfone escolhido estiver desconectado, o Tagara usa o padrão do sistema. Fones Bluetooth gravam com qualidade de telefone; o microfone do Mac costuma transcrever melhor.")
+        }
+    }
+}
+
+/// The microphone choice, shared by Settings and the menu bar.
+struct MicrophonePicker: View {
+    @Environment(AppController.self) private var controller
+
+    var body: some View {
+        Picker("Microfone", selection: Binding(
+            get: { controller.microphoneUID },
+            set: { controller.chooseMicrophone(uid: $0) })) {
+            Text("Padrão do sistema").tag(String?.none)
+            ForEach(controller.microphoneOptions) { option in
+                Text(option.isConnected ? option.name : "\(option.name) (desconectado)").tag(Optional(option.uid))
+            }
         }
     }
 }

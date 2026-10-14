@@ -254,3 +254,40 @@ import Testing
     }
 }
 
+
+@Suite struct MicrophoneChoiceTests {
+    let builtIn = InputDevice(uid: "BuiltInMicrophoneDevice", name: "Microfone do MacBook Pro")
+    let yeti = InputDevice(uid: "AppleUSBAudioEngine:Blue:Yeti", name: "Yeti")
+
+    @Test func noChoiceUsesTheSystemDefault() {
+        #expect(MicrophoneChoice.device(chosen: nil, available: [builtIn, yeti]) == nil)
+    }
+
+    @Test func connectedChoiceIsUsed() {
+        #expect(MicrophoneChoice.device(chosen: yeti.uid, available: [builtIn, yeti]) == yeti)
+    }
+
+    @Test func disconnectedChoiceFallsBackToTheSystemDefault() {
+        #expect(MicrophoneChoice.device(chosen: yeti.uid, available: [builtIn]) == nil)
+        #expect(MicrophoneChoice.device(chosen: yeti.uid, available: []) == nil)
+    }
+
+    @Test func optionsListConnectedDevices() {
+        let options = MicrophoneChoice.options(chosen: nil, chosenName: nil, available: [builtIn, yeti])
+        #expect(options == [
+            MicrophoneOption(uid: builtIn.uid, name: builtIn.name, isConnected: true),
+            MicrophoneOption(uid: yeti.uid, name: yeti.name, isConnected: true),
+        ])
+    }
+
+    @Test func disconnectedChoiceStaysInTheOptions() {
+        let options = MicrophoneChoice.options(chosen: yeti.uid, chosenName: "Yeti", available: [builtIn])
+        #expect(options.last == MicrophoneOption(uid: yeti.uid, name: "Yeti", isConnected: false))
+        #expect(options.count == 2)
+    }
+
+    @Test func disconnectedChoiceWithoutASavedNameStillShowsUp() {
+        let options = MicrophoneChoice.options(chosen: yeti.uid, chosenName: nil, available: [])
+        #expect(options == [MicrophoneOption(uid: yeti.uid, name: yeti.uid, isConnected: false)])
+    }
+}

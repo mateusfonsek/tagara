@@ -68,6 +68,8 @@ private struct MenuContent: View {
             Button("Atualizar para \(version)…") { controller.updater.install() }
             Divider()
         }
+        MicrophonePicker().pickerStyle(.menu)
+        Divider()
         Button("Copiar último ditado") { controller.copyLastTranscript() }
             .disabled(controller.lastTranscript == nil && controller.history.entries.isEmpty)
         Button("Abrir Tagara…") { controller.openMainWindow?() }

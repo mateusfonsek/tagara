@@ -48,8 +48,14 @@ final class AppController {
         }
     }
 
+    /// The chosen microphone's Core Audio UID; nil follows the system default.
+    private(set) var microphoneUID: String?
+    /// Its name, kept so an unplugged choice still reads well in the picker.
+    private var microphoneName: String?
+
     let models = ModelManager()
     let updater = Updater()
+    let audioDevices = AudioDevices()
     /// Set by the SwiftUI layer, which owns window scenes.
     var openMainWindow: (() -> Void)?
 
@@ -63,6 +69,8 @@ final class AppController {
         soundsEnabled = UserDefaults.standard.object(forKey: "soundsEnabled") as? Bool ?? true
         historyEnabled = UserDefaults.standard.object(forKey: "historyEnabled") as? Bool ?? true
         handsFreeEnabled = UserDefaults.standard.object(forKey: "handsFreeEnabled") as? Bool ?? true
+        microphoneUID = UserDefaults.standard.string(forKey: "microphoneUID")
+        microphoneName = UserDefaults.standard.string(forKey: "microphoneName")
         if let data = UserDefaults.standard.data(forKey: "stats"),
            let saved = try? JSONDecoder().decode(UsageStats.self, from: data) {
             stats = saved
@@ -74,6 +82,19 @@ final class AppController {
         recorder.onLevel = { [weak self] value in
             Task { @MainActor in self?.level = value }
         }
+    }
+
+    /// Picker rows: the connected microphones, plus the chosen one if it's unplugged.
+    var microphoneOptions: [MicrophoneOption] {
+        MicrophoneChoice.options(chosen: microphoneUID, chosenName: microphoneName, available: audioDevices.inputs)
+    }
+
+    /// nil goes back to the system default.
+    func chooseMicrophone(uid: String?) {
+        microphoneUID = uid
+        microphoneName = uid.map { uid in audioDevices.inputs.first { $0.uid == uid }?.name ?? microphoneName ?? uid }
+        UserDefaults.standard.set(microphoneUID, forKey: "microphoneUID")
+        UserDefaults.standard.set(microphoneName, forKey: "microphoneName")
     }
 
     var needsSetup: Bool { !hasMicrophone || !hasAccessibility || !models.isDownloaded }
@@ -151,7 +172,8 @@ final class AppController {
         }
         models.prewarm()
         do {
-            try recorder.start()
+            let device = MicrophoneChoice.device(chosen: microphoneUID, available: audioDevices.inputs)
+            try recorder.start(deviceUID: device?.uid)
         } catch {
             showNotice(error.localizedDescription)
             return

@@ -1,4 +1,5 @@
 import AVFoundation
+import AudioToolbox
 import os
 
 /// Captures microphone audio as 16 kHz mono Float32, in memory only.
@@ -15,12 +16,15 @@ final class AudioRecorder {
     private let targetFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false)!
 
-    func start() throws {
+    /// Starts capture from the microphone with this Core Audio UID, or from the system default
+    /// when it's nil or the device is gone.
+    func start(deviceUID: String? = nil) throws {
         stop()
         samples.withLock { $0.removeAll(keepingCapacity: true) }
 
         let engine = AVAudioEngine()
         let input = engine.inputNode
+        if let deviceUID { Self.use(deviceUID, on: input) }
         let inputFormat = input.outputFormat(forBus: 0)
         guard inputFormat.channelCount > 0, inputFormat.sampleRate > 0 else {
             throw RecorderError.noInputDevice
@@ -49,6 +53,15 @@ final class AudioRecorder {
             defer { buffer = [] }
             return buffer
         }
+    }
+
+    /// Points the engine's input at a specific device. Must run before the input format is read.
+    /// On failure (device unplugged a moment ago) the engine keeps the system default.
+    private static func use(_ uid: String, on input: AVAudioInputNode) {
+        guard var deviceID = AudioDevices.deviceID(forUID: uid), let unit = input.audioUnit else { return }
+        AudioUnitSetProperty(
+            unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0,
+            &deviceID, UInt32(MemoryLayout<AudioDeviceID>.size))
     }
 
     private func append(_ buffer: AVAudioPCMBuffer) {
