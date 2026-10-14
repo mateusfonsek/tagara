@@ -29,12 +29,12 @@ struct HomeView: View {
             Text(greeting).font(.largeTitle.weight(.bold))
             HStack(spacing: 6) {
                 Text("Segura")
-                Keycap(symbol: "⌥", label: "direito")
+                Keycap(controller.triggerKey)
                 Text("e fala. Quando soltar, o texto aparece onde estiver o cursor.")
             }
             .foregroundStyle(.secondary)
             if controller.handsFreeEnabled {
-                Text("Para falar sem segurar, toque duas vezes no ⌥. Um toque termina.")
+                Text("Para falar sem segurar, toque duas vezes no \(controller.triggerKey.symbol). Um toque termina.")
                     .font(.callout)
                     .foregroundStyle(.tertiary)
             }
@@ -138,7 +138,7 @@ private struct LastDictationCard: View {
                         Button("Ver histórico", action: showHistory).buttonStyle(.link).foregroundStyle(Brand.violeta)
                     }
                 } else {
-                    Text("Nada por aqui ainda. Segura ⌥ e manda ver.")
+                    Text("Nada por aqui ainda. Segura \(controller.triggerKey.symbol) e manda ver.")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, minHeight: 72, alignment: .topLeading)
                 }
@@ -148,6 +148,7 @@ private struct LastDictationCard: View {
 }
 
 private struct TryCard: View {
+    @Environment(AppController.self) private var controller
     @State private var text = ""
     /// Stays unfocused on open, so the window doesn't scroll down to this field.
     @FocusState private var focused: Bool
@@ -162,7 +163,7 @@ private struct TryCard: View {
                         .scrollContentBackground(.hidden)
                         .frame(height: 96)
                     if text.isEmpty {
-                        Text("Clica aqui, segura ⌥ direito e fala…")
+                        Text("Clica aqui, segura \(controller.triggerKey.name) e fala…")
                             .foregroundStyle(.tertiary)
                             .padding(.leading, 5)
                             .allowsHitTesting(false)

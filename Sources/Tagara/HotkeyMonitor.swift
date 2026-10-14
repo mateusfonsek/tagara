@@ -2,15 +2,22 @@ import CoreGraphics
 import TagaraCore
 import Foundation
 
-/// Listens for the right Option key system-wide via a listen-only event tap.
+/// Listens for the dictation key system-wide via a listen-only event tap.
 /// The tap is passive: the system only wakes us when a key event happens.
 final class HotkeyMonitor {
-    private static let rightOptionKeyCode: Int64 = 61
-    /// NX_DEVICERALTKEYMASK — set while the right Option key is down.
-    private static let rightOptionDeviceMask: UInt64 = 0x40
-    private static let escapeKeyCode: Int64 = 53
-
     var onEvent: ((HotkeyStateMachine.Output) -> Void)?
+
+    /// Changing the key drops any half-finished press or tap on the old one.
+    var trigger = TriggerKey.default {
+        didSet {
+            guard trigger != oldValue else { return }
+            let handsFree = stateMachine.handsFreeEnabled
+            stateMachine = HotkeyStateMachine()
+            stateMachine.handsFreeEnabled = handsFree
+            pendingTick?.cancel()
+            pendingTick = nil
+        }
+    }
 
     private var stateMachine = HotkeyStateMachine()
     private var pendingTick: DispatchWorkItem?
@@ -29,6 +36,7 @@ final class HotkeyMonitor {
     func start() -> Bool {
         guard tap == nil else { return true }
         let mask = (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.keyDown.rawValue)
+            | (1 << CGEventType.keyUp.rawValue)
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
@@ -51,24 +59,22 @@ final class HotkeyMonitor {
     }
 
     private func handle(type: CGEventType, event: CGEvent) {
-        let input: HotkeyStateMachine.Input
+        let kind: KeyEvent.Kind
         switch type {
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return
-        case .keyDown:
-            input = event.getIntegerValueField(.keyboardEventKeycode) == Self.escapeKeyCode ? .escape : .otherKey
-        case .flagsChanged:
-            if event.getIntegerValueField(.keyboardEventKeycode) == Self.rightOptionKeyCode {
-                let down = event.flags.rawValue & Self.rightOptionDeviceMask != 0
-                input = down ? .triggerDown : .triggerUp
-            } else {
-                input = .otherKey
-            }
-        default:
-            return
+        case .keyDown: kind = .keyDown
+        case .keyUp: kind = .keyUp
+        case .flagsChanged: kind = .flagsChanged
+        default: return
         }
-        feed(input)
+        let key = KeyEvent(
+            kind: kind,
+            keyCode: event.getIntegerValueField(.keyboardEventKeycode),
+            flags: event.flags.rawValue,
+            isRepeat: event.getIntegerValueField(.keyboardEventAutorepeat) != 0)
+        if let input = trigger.input(for: key) { feed(input) }
     }
 
     private func feed(_ input: HotkeyStateMachine.Input) {

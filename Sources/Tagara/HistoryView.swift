@@ -12,7 +12,7 @@ struct HistoryView: View {
                 ContentUnavailableView(
                     "Nada por aqui ainda", systemImage: "waveform",
                     description: Text(controller.historyEnabled
-                        ? "Segura ⌥ direito e manda ver. Seus ditados aparecem aqui."
+                        ? "Segura \(controller.triggerKey.name) e manda ver. Seus ditados aparecem aqui."
                         : "O histórico está desligado nos Ajustes."))
             } else if groups.isEmpty {
                 ContentUnavailableView.search(text: search)

@@ -18,7 +18,7 @@ final class AppController {
 
     private(set) var phase: Phase = .idle
     private(set) var level: Float = 0
-    /// True after a double tap on ⌥: recording continues until the next tap.
+    /// True after a double tap on the dictation key: recording continues until the next tap.
     private(set) var handsFree = false
     private(set) var stats: UsageStats
     private(set) var hasMicrophone = Permissions.microphone
@@ -40,7 +40,15 @@ final class AppController {
         didSet { UserDefaults.standard.set(soundsEnabled, forKey: "soundsEnabled") }
     }
 
-    /// Double tap on ⌥ locks recording hands-free.
+    /// The key held to dictate.
+    var triggerKey: TriggerKey {
+        didSet {
+            UserDefaults.standard.set(triggerKey.rawValue, forKey: "triggerKey")
+            hotkey.trigger = triggerKey
+        }
+    }
+
+    /// Double tap on the dictation key locks recording hands-free.
     var handsFreeEnabled: Bool {
         didSet {
             UserDefaults.standard.set(handsFreeEnabled, forKey: "handsFreeEnabled")
@@ -71,6 +79,7 @@ final class AppController {
         soundsEnabled = UserDefaults.standard.object(forKey: "soundsEnabled") as? Bool ?? true
         historyEnabled = UserDefaults.standard.object(forKey: "historyEnabled") as? Bool ?? true
         handsFreeEnabled = UserDefaults.standard.object(forKey: "handsFreeEnabled") as? Bool ?? true
+        triggerKey = UserDefaults.standard.string(forKey: "triggerKey").flatMap(TriggerKey.init) ?? .default
         microphoneUID = UserDefaults.standard.string(forKey: "microphoneUID")
         microphoneName = UserDefaults.standard.string(forKey: "microphoneName")
         if let data = UserDefaults.standard.data(forKey: "stats"),
@@ -80,6 +89,7 @@ final class AppController {
             stats = UsageStats()
         }
         hotkey.handsFreeEnabled = handsFreeEnabled
+        hotkey.trigger = triggerKey
         hotkey.onEvent = { [weak self] output in self?.handle(output) }
         recorder.onLevel = { [weak self] value in
             Task { @MainActor in self?.level = value }

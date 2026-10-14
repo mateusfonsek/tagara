@@ -1,4 +1,5 @@
 import SwiftUI
+import TagaraCore
 
 struct SettingsView: View {
     @Environment(AppController.self) private var controller
@@ -18,12 +19,19 @@ struct SettingsView: View {
             MicrophoneSection()
 
             Section {
-                LabeledContent("Tecla para falar") { Keycap(symbol: "⌥", label: "direito") }
-                Toggle("Toque duplo no ⌥ trava a gravação", isOn: $controller.handsFreeEnabled)
+                Picker("Tecla para falar", selection: $controller.triggerKey) {
+                    ForEach(TriggerKey.allCases) { key in Text(key.name).tag(key) }
+                }
+                Toggle("Toque duplo no \(controller.triggerKey.symbol) trava a gravação", isOn: $controller.handsFreeEnabled)
             } header: {
                 Text("Tecla")
             } footer: {
-                Text("Segure para falar e solte para escrever. Com o toque duplo, você pode soltar a tecla: um toque no ⌥ termina e Esc cancela.")
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Segure para falar e solte para escrever. Com o toque duplo, você pode soltar a tecla: um toque no \(controller.triggerKey.symbol) termina e Esc cancela.")
+                    if controller.triggerKey == .fn {
+                        Text("Para o 🌐 não abrir os emojis junto, em Ajustes do Sistema → Teclado, deixe \"Pressionar a tecla 🌐\" em \"Não fazer nada\".")
+                    }
+                }
             }
 
             Section("Modelo de voz") {

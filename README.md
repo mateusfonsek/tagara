@@ -34,6 +34,7 @@ A diferença para os apps de ditado mais conhecidos é que **nada sai do seu Mac
 - **Leve.** Parado, usa 0% de CPU e o microfone fica fechado. O modelo sai da memória sozinho depois de alguns minutos sem uso e volta enquanto você fala.
 - **Em qualquer app.** Escreve onde está o cursor e devolve a sua área de transferência como estava.
 - **Mãos livres.** Toque duas vezes no ⌥ para ditar textos longos sem segurar a tecla; um toque termina.
+- **Escolha a tecla.** ⌥ direito por padrão; dá para trocar por ⌘ direito, ⌃ direito, Fn/🌐 ou F13–F15 nos Ajustes.
 - **Escolha o microfone.** Nos Ajustes ou direto na barra de menu. Se ele for desconectado, o Tagara volta para o padrão do sistema e retoma a escolha quando ele reaparece.
 - **Atualiza sozinho.** O app avisa quando sai uma versão nova e se atualiza com um clique, instalando só versões assinadas pelo certificado do Tagara.
 - **Histórico local.** Os últimos 50 ditados ficam numa aba própria, com busca, para copiar de novo o que se perdeu. Dá para desligar.
@@ -128,7 +129,7 @@ VERSION=0.1.0 scripts/dmg.sh  # gera dist/Tagara-0.1.0.dmg
 
 ```
 Sources/Tagara/       app: barra de menu, janela, pílula, tecla, áudio, transcrição e escrita
-Sources/TagaraCore/   lógica pura e testada: tecla, estatísticas, histórico, barras, microfone
+Sources/TagaraCore/   lógica pura e testada: tecla, estatísticas, histórico, barras, microfone, atualização
 Tests/                testes (Swift Testing)
 Resources/            Info.plist, ícone (.icon do Icon Composer) e cor de destaque
 scripts/              instalador (get.sh), bundle, install, dmg e certificado local
@@ -142,7 +143,6 @@ Cada push na `main` roda os testes num runner `macos-26`, gera o DMG e publica u
 ## Roadmap
 
 - Vocabulário próprio (nomes e termos técnicos como `kubectl`) com o *vocabulary boosting* do FluidAudio
-- Tecla de ditado configurável
 - Assinatura e notarização com Developer ID, para abrir sem aviso do macOS
 
 ## Contribuindo

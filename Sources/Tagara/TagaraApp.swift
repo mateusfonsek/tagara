@@ -62,7 +62,7 @@ private struct MenuContent: View {
     @Environment(AppController.self) private var controller
 
     var body: some View {
-        Text(controller.isReady ? "Pronto. Segura ⌥ direito e fala." : "Falta configurar")
+        Text(controller.isReady ? "Pronto. Segura \(controller.triggerKey.name) e fala." : "Falta configurar")
         Divider()
         if let version = controller.updater.availableVersion {
             Button("Atualizar para \(version)…") { controller.updater.install() }

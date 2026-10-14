@@ -340,3 +340,64 @@ import Testing
         #expect(throws: (any Error).self) { try LatestRelease.parse(json("nightly", [("Tagara.dmg", dmg)])) }
     }
 }
+
+@Suite struct TriggerKeyTests {
+    func flags(_ code: Int64, _ flags: UInt64) -> KeyEvent { KeyEvent(kind: .flagsChanged, keyCode: code, flags: flags) }
+    func down(_ code: Int64, repeat: Bool = false) -> KeyEvent { KeyEvent(kind: .keyDown, keyCode: code, isRepeat: `repeat`) }
+    func up(_ code: Int64) -> KeyEvent { KeyEvent(kind: .keyUp, keyCode: code) }
+
+    @Test func rightOptionIsTheDefaultAndReadsItsDeviceFlag() {
+        #expect(TriggerKey.default == .rightOption)
+        #expect(TriggerKey.rightOption.input(for: flags(61, 0x80040)) == .triggerDown)
+        #expect(TriggerKey.rightOption.input(for: flags(61, 0x100)) == .triggerUp)
+    }
+
+    @Test func leftOptionIsAnotherKeyNotTheTrigger() {
+        #expect(TriggerKey.rightOption.input(for: flags(58, 0x80020)) == .otherKey)
+    }
+
+    @Test func rightCommandAndControlUseTheirOwnKeys() {
+        #expect(TriggerKey.rightCommand.input(for: flags(54, 0x100010)) == .triggerDown)
+        #expect(TriggerKey.rightCommand.input(for: flags(54, 0x100)) == .triggerUp)
+        #expect(TriggerKey.rightCommand.input(for: flags(61, 0x80040)) == .otherKey)
+        #expect(TriggerKey.rightControl.input(for: flags(62, 0x42000)) == .triggerDown)
+        #expect(TriggerKey.rightControl.input(for: flags(62, 0x100)) == .triggerUp)
+    }
+
+    @Test func fnReadsTheSecondaryFnFlag() {
+        #expect(TriggerKey.fn.input(for: flags(63, 0x800000)) == .triggerDown)
+        #expect(TriggerKey.fn.input(for: flags(63, 0)) == .triggerUp)
+    }
+
+    @Test func typingWhileHoldingAModifierIsAnotherKey() {
+        #expect(TriggerKey.rightCommand.input(for: down(8)) == .otherKey)
+        #expect(TriggerKey.rightCommand.input(for: up(8)) == nil)
+    }
+
+    @Test func functionKeysUseKeyDownAndKeyUpAndIgnoreRepeats() {
+        #expect(TriggerKey.f13.input(for: down(105)) == .triggerDown)
+        #expect(TriggerKey.f13.input(for: down(105, repeat: true)) == nil)
+        #expect(TriggerKey.f13.input(for: up(105)) == .triggerUp)
+        #expect(TriggerKey.f14.input(for: down(107)) == .triggerDown)
+        #expect(TriggerKey.f15.input(for: up(113)) == .triggerUp)
+    }
+
+    @Test func otherKeysWhileUsingAFunctionKeyAreOtherKeys() {
+        #expect(TriggerKey.f13.input(for: down(0)) == .otherKey)
+        #expect(TriggerKey.f13.input(for: up(0)) == nil)
+        #expect(TriggerKey.f13.input(for: flags(56, 0x20002)) == .otherKey)
+    }
+
+    @Test func escapeIsEscapeForEveryTrigger() {
+        for key in TriggerKey.allCases { #expect(key.input(for: down(53)) == .escape) }
+    }
+
+    @Test func everyKeyHasTextForTheInterface() {
+        for key in TriggerKey.allCases {
+            #expect(!key.symbol.isEmpty)
+            #expect(!key.name.isEmpty)
+        }
+        #expect(TriggerKey.rightOption.name == "⌥ direito")
+        #expect(TriggerKey(rawValue: "rightCommand") == .rightCommand)
+    }
+}

@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import TagaraCore
 
 /// The main window: a native sidebar with Início, Histórico and Ajustes.
 struct MainView: View {
@@ -74,10 +75,21 @@ struct Keycap: View {
     let symbol: String
     let label: String
 
+    init(symbol: String, label: String) {
+        self.symbol = symbol
+        self.label = label
+    }
+
+    init(_ key: TriggerKey) {
+        self.init(symbol: key.symbol, label: key.side)
+    }
+
     var body: some View {
         HStack(spacing: 4) {
             Text(symbol).font(.system(size: 13, weight: .semibold))
-            Text(label).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+            if !label.isEmpty {
+                Text(label).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
