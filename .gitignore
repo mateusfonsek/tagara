@@ -1,0 +1,13 @@
+.build/
+build/
+.swiftpm/
+*.xcodeproj
+.DS_Store
+dist/
+__pycache__/
+
+# Exploração de branding: fica só local. ref/ tem ícones de outros apps (direitos de terceiros).
+branding/ref/
+branding/*.html
+branding/icons/*.icon
+branding/icons/render/

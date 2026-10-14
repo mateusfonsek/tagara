@@ -1,0 +1,20 @@
+/* Tagara design tokens. Fonte da verdade: docs/brand-guidelines.md */
+:root {
+  --tg-violeta: #5B2A86;
+  --tg-violeta-claro: #C7A2EC;
+  --tg-grafite: #2F332C;
+  --tg-sobre-grafite: #F1F4EC;
+  --tg-font-marca: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --tg-font-transcricao: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --tg-radius-cartao: 12px;
+  --tg-radius-campo: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tg-violeta: #8E5CC9;
+    --tg-violeta-claro: #C7A2EC;
+    --tg-grafite: #2F332C;
+    --tg-sobre-grafite: #F1F4EC;
+  }
+}

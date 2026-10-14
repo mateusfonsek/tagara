@@ -1,0 +1,63 @@
+name: CI / Release
+
+# Every push to main runs the tests, builds Tagara.dmg and publishes it as a GitHub Release
+# (v<VERSION>.<run number>). Pull requests only test and build.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Testes e DMG
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      # Xcode 26 is required: actool compiles the Liquid Glass icon (.icon) only from 26 on.
+      - name: Selecionar Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Cache do SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Testes
+        run: swift test
+
+      - name: Versão
+        id: version
+        run: echo "version=$(cat VERSION).${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Gerar DMG
+        run: VERSION=${{ steps.version.outputs.version }} scripts/dmg.sh
+
+      - name: Guardar DMG do build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tagara-${{ steps.version.outputs.version }}
+          path: dist/*.dmg
+
+      - name: Publicar release
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" dist/*.dmg \
+            --title "Tagara ${{ steps.version.outputs.version }}" \
+            --notes "Baixe o \`.dmg\`, arraste o Tagara para Aplicativos e veja a primeira abertura no [README](https://github.com/${{ github.repository }}#instalação)." \
+            --generate-notes

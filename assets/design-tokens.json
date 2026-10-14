@@ -1,0 +1,43 @@
+{
+  "color": {
+    "violeta": {
+      "light": "#5B2A86",
+      "dark": "#8E5CC9",
+      "use": "AccentColor: seleção, botões, toggles"
+    },
+    "violeta-claro": {
+      "light": "#C7A2EC",
+      "dark": "#C7A2EC",
+      "use": "detalhe sobre grafite"
+    },
+    "grafite": {
+      "light": "#2F332C",
+      "dark": "#2F332C",
+      "use": "fundo do ícone e da pílula"
+    },
+    "sobre-grafite": {
+      "light": "#F1F4EC",
+      "dark": "#F1F4EC",
+      "use": "texto e barras sobre grafite"
+    }
+  },
+  "font": {
+    "app": "SF Pro (sistema)",
+    "marca": "Atkinson Hyperlegible Next",
+    "transcricao": "Atkinson Hyperlegible Mono"
+  },
+  "radius": {
+    "cartao": 12,
+    "campo": 8,
+    "tecla": 6,
+    "pilula": 999
+  },
+  "icon": {
+    "source": "Resources/AppIcon.icon",
+    "bars-resting": [
+      0.48,
+      1,
+      0.48
+    ]
+  }
+}
