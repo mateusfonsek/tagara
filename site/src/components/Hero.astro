@@ -1,5 +1,6 @@
 ---
 import CopyCommand from './CopyCommand.astro';
+import Demo from './Demo.astro';
 import DownloadButton from './DownloadButton.astro';
 import type { Strings } from '../i18n/types';
 import { INSTALL_COMMAND } from '../lib/constants';
@@ -21,6 +22,7 @@ const { s } = Astro.props;
       <p class="hero__requirements" data-reveal style="--delay: 300ms">{s.hero.requirements}</p>
     </div>
     <div class="hero__demo" data-reveal style="--delay: 250ms">
+      <Demo s={s} />
     </div>
   </div>
 </section>

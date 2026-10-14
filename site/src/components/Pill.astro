@@ -1,0 +1,110 @@
+---
+interface Props {
+  listening: string;
+  typing: string;
+  state?: 'listening' | 'typing';
+}
+const { listening, typing, state = 'listening' } = Astro.props;
+---
+<span class="pill" data-pill-state={state}>
+  <span class="pill__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  <span class="pill__label pill__label--listening">{listening}</span>
+  <span class="pill__label pill__label--typing">{typing}</span>
+</span>
+
+<style>
+  /* The app's recording HUD: always graphite, middle bar in light violet, no glow. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 2.5em;
+    padding: 0 1em 0 0.875em;
+    border-radius: 999px;
+    background: var(--tg-grafite);
+    color: var(--tg-sobre-grafite);
+    font-family: var(--tg-font-marca);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+  }
+
+  .pill__bars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 1.125em;
+  }
+
+  .pill__bars i {
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--tg-sobre-grafite);
+    transform: scaleY(0.48);
+  }
+
+  .pill__bars i:nth-child(2) {
+    background: var(--tg-violeta-claro);
+    transform: scaleY(1);
+  }
+
+  [data-pill-state='listening'] .pill__bars i {
+    animation: tg-voice 0.9s var(--ease) infinite alternate;
+  }
+
+  [data-pill-state='listening'] .pill__bars i:nth-child(1) {
+    animation-delay: -0.3s;
+  }
+
+  [data-pill-state='listening'] .pill__bars i:nth-child(2) {
+    animation-duration: 0.7s;
+    animation-delay: -0.55s;
+  }
+
+  [data-pill-state='listening'] .pill__bars i:nth-child(3) {
+    animation-duration: 1.1s;
+    animation-delay: -0.15s;
+  }
+
+  [data-pill-state='typing'] .pill__bars i {
+    animation: tg-breathe 0.9s ease-in-out infinite;
+  }
+
+  [data-pill-state='typing'] .pill__bars i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  [data-pill-state='typing'] .pill__bars i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .pill__label--typing,
+  [data-pill-state='typing'] .pill__label--listening {
+    display: none;
+  }
+
+  [data-pill-state='typing'] .pill__label--typing {
+    display: inline;
+  }
+
+  @keyframes tg-voice {
+    from {
+      transform: scaleY(0.3);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes tg-breathe {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(0.6);
+    }
+  }
+</style>

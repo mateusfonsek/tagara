@@ -1,0 +1,366 @@
+---
+import Keycap from './Keycap.astro';
+import Pill from './Pill.astro';
+import type { Strings } from '../i18n/types';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+const scenes = s.demo.scenes;
+---
+<figure class="demo" data-demo data-phase="done" role="img" aria-label={s.hero.demoDescription}>
+  <div class="demo__stage" aria-hidden="true">
+    <div class="demo__window">
+      {scenes.map((scene, i) => (
+        <div class:list={['demo__scene', i === 0 && 'is-active']} data-demo-scene>
+          <div class="demo__titlebar">
+            <span class="demo__lights"><i></i><i></i><i></i></span>
+            <span class="demo__title">{scene.title}</span>
+          </div>
+          {scene.app === 'terminal' && (
+            <div class="demo__body term">
+              <p class="term__muted">{scene.context[0]}</p>
+              <p class="term__banner">{scene.context[1]}</p>
+              <p class="term__input">
+                <span class="term__chevron">&gt;</span>
+                <span class="demo__typed">{scene.typed}</span><span class="demo__cursor"></span>
+              </p>
+            </div>
+          )}
+          {scene.app === 'chat' && (
+            <div class="demo__body chat">
+              <div class="chat__thread">
+                <p class="chat__name">{scene.context[0]}</p>
+                <p class="chat__bubble">{scene.context[1]}</p>
+              </div>
+              <p class="chat__input">
+                <span class="demo__typed">{scene.typed}</span><span class="demo__cursor"></span>
+              </p>
+            </div>
+          )}
+          {scene.app === 'mail' && (
+            <div class="demo__body mail">
+              <p class="mail__field">{scene.context[0]}</p>
+              <p class="mail__field">{scene.context[1]}</p>
+              <p class="mail__text">
+                <span class="demo__typed">{scene.typed}</span><span class="demo__cursor"></span>
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {scenes.map((scene, i) => (
+      <p class:list={['demo__caption', i === 0 && 'is-active']} data-demo-caption>
+        {scene.speech.split(' ').map((word) => <span data-word>{word} </span>)}
+      </p>
+    ))}
+
+    <div class="demo__pill">
+      <Pill listening={s.demo.listening} typing={s.demo.typing} />
+    </div>
+    <div class="demo__key"><Keycap /></div>
+  </div>
+</figure>
+
+<script>
+  import { buildTimeline, spokenWords, stepAt, type Step } from '../lib/timeline';
+  import { prefersReducedMotion } from '../scripts/motion';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-demo]')) startDemo(root);
+
+  function startDemo(root: HTMLElement) {
+    // Reduced motion (and no JS at all) keeps the markup's static frame: scene 1, text written.
+    if (prefersReducedMotion()) return;
+
+    const scenes = [...root.querySelectorAll<HTMLElement>('[data-demo-scene]')];
+    const captions = [...root.querySelectorAll<HTMLElement>('[data-demo-caption]')];
+    const words = captions.map((caption) => [...caption.querySelectorAll<HTMLElement>('[data-word]')]);
+    const pill = root.querySelector<HTMLElement>('.pill');
+    const steps = buildTimeline(words.map((w) => w.length));
+
+    let current: Step | undefined;
+    let shown = -1;
+
+    const render = (elapsed: number) => {
+      const { step, progress } = stepAt(steps, elapsed);
+      if (step !== current) {
+        current = step;
+        shown = -1;
+        root.dataset.phase = step.phase;
+        scenes.forEach((el, i) => el.classList.toggle('is-active', i === step.scene));
+        captions.forEach((el, i) => el.classList.toggle('is-active', i === step.scene));
+        if (pill) pill.dataset.pillState = step.phase === 'typing' ? 'typing' : 'listening';
+      }
+      const count = spokenWords(step.phase, progress, words[step.scene].length);
+      if (count !== shown) {
+        shown = count;
+        words[step.scene].forEach((word, i) => word.classList.toggle('is-spoken', i < count));
+      }
+    };
+
+    // Only runs while on screen and while the tab is visible.
+    let elapsed = 0;
+    let last: number | undefined;
+    let frame = 0;
+    let onScreen = false;
+
+    const tick = (now: number) => {
+      if (last !== undefined) elapsed += Math.min(now - last, 100);
+      last = now;
+      render(elapsed);
+      frame = requestAnimationFrame(tick);
+    };
+
+    const update = () => {
+      const run = onScreen && !document.hidden;
+      if (run && !frame) {
+        last = undefined;
+        frame = requestAnimationFrame(tick);
+      } else if (!run && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      update();
+    }).observe(root);
+    document.addEventListener('visibilitychange', update);
+    render(0);
+  }
+</script>
+
+<style>
+  .demo {
+    margin: 0;
+  }
+
+  .demo__stage {
+    position: relative;
+    padding-bottom: 5.5rem;
+    container-type: inline-size;
+  }
+
+  /* --- window --- */
+  .demo__window {
+    position: relative;
+    aspect-ratio: 16 / 10.5;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow);
+    font-size: clamp(11px, 2.4cqi, 15px);
+  }
+
+  .demo__scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.45s var(--ease);
+  }
+
+  .demo__scene.is-active {
+    opacity: 1;
+  }
+
+  .demo__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.75em 1em;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-sunken);
+  }
+
+  .demo__lights {
+    display: flex;
+    gap: 0.45em;
+  }
+
+  .demo__lights i {
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .demo__title {
+    flex: 1;
+    margin-right: 3.5em;
+    text-align: center;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .demo__body {
+    flex: 1;
+    padding: 1.25em 1.5em;
+  }
+
+  /* Text appears all at once after the key is released, like the app's paste. */
+  .demo__typed {
+    opacity: 0;
+  }
+
+  .demo[data-phase='done'] .demo__scene.is-active .demo__typed {
+    opacity: 1;
+  }
+
+  .demo__cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.15em;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    background: var(--accent-text);
+    animation: tg-blink 1.1s steps(1) infinite;
+  }
+
+  /* terminal */
+  .term {
+    background: var(--tg-grafite);
+    color: var(--tg-sobre-grafite);
+    font-family: var(--tg-font-transcricao);
+    font-size: 0.95em;
+    line-height: 1.7;
+  }
+
+  .term__muted {
+    color: #9da595;
+  }
+
+  .term__banner {
+    margin: 0.6em 0 1.2em;
+    color: var(--tg-violeta-claro);
+  }
+
+  .term__chevron {
+    margin-right: 0.6em;
+    color: var(--tg-violeta-claro);
+  }
+
+  /* chat */
+  .chat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1em;
+  }
+
+  .chat__name {
+    font-size: 0.8em;
+    font-weight: 650;
+    color: var(--text-muted);
+  }
+
+  .chat__bubble {
+    display: inline-block;
+    margin-top: 0.35em;
+    padding: 0.55em 0.9em;
+    border-radius: 1.1em 1.1em 1.1em 0.3em;
+    background: var(--bg-sunken);
+  }
+
+  .chat__input {
+    min-height: 2.6em;
+    padding: 0.6em 1em;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+
+  /* mail */
+  .mail__field {
+    padding-block: 0.5em;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.9em;
+    color: var(--text-muted);
+  }
+
+  .mail__text {
+    margin-top: 1em;
+    line-height: 1.6;
+  }
+
+  /* --- spoken caption --- */
+  .demo__caption {
+    position: absolute;
+    left: 50%;
+    bottom: calc(5.5rem + 4.25rem);
+    width: max-content;
+    max-width: 82%;
+    padding: 0.6em 1em;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--tg-violeta) 12%, var(--bg-raised));
+    border: 1px solid color-mix(in srgb, var(--tg-violeta) 25%, transparent);
+    font-size: clamp(13px, 2.6cqi, 16px);
+    font-style: italic;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition:
+      opacity 0.3s var(--ease),
+      transform 0.3s var(--ease);
+  }
+
+  .demo__caption::before {
+    content: '“';
+  }
+
+  .demo__caption::after {
+    content: '”';
+  }
+
+  .demo[data-phase='listening'] .demo__caption.is-active {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .demo__caption [data-word] {
+    opacity: 0.18;
+    transition: opacity 0.2s var(--ease);
+  }
+
+  .demo__caption [data-word].is-spoken {
+    opacity: 1;
+  }
+
+  /* --- pill --- */
+  .demo__pill {
+    position: absolute;
+    left: 50%;
+    bottom: calc(5.5rem + 1rem);
+    opacity: 0;
+    transform: translate(-50%, 10px);
+    transition:
+      opacity 0.25s var(--ease),
+      transform 0.25s var(--ease);
+  }
+
+  .demo[data-phase='listening'] .demo__pill,
+  .demo[data-phase='typing'] .demo__pill {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  /* --- key --- */
+  .demo__key {
+    position: absolute;
+    right: 8%;
+    bottom: 0;
+    font-size: clamp(13px, 2.4cqi, 16px);
+  }
+
+  @keyframes tg-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
