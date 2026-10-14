@@ -37,8 +37,12 @@ hdiutil attach "$TMP/Tagara.dmg" -nobrowse -readonly -quiet -mountpoint "$MOUNT"
 
 if pgrep -x Tagara >/dev/null; then
     say "Fechando o Tagara aberto…"
-    osascript -e 'quit app "Tagara"' >/dev/null 2>&1 || pkill -x Tagara || true
-    sleep 1
+    osascript -e 'with timeout of 5 seconds' -e 'quit app "Tagara"' -e 'end timeout' >/dev/null 2>&1 || true
+    # The quit request can be ignored (it is, when the app itself started this script to
+    # update), and `open` would then just bring the old process back to front.
+    for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -x Tagara >/dev/null || break; sleep 0.3; done
+    pkill -x Tagara 2>/dev/null || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -x Tagara >/dev/null || break; sleep 0.3; done
 fi
 
 say "Instalando em ${DEST}…"
