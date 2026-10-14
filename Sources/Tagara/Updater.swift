@@ -3,8 +3,10 @@ import Foundation
 import Observation
 import TagaraCore
 
-/// Checks GitHub Releases for a newer Tagara and installs it with the one-line installer.
+/// Checks GitHub Releases for a newer Tagara and installs it in place.
 /// No server of our own: one small request to the GitHub API on launch and once a day.
+/// The update is the release's DMG, and it's installed only if its app is signed with the
+/// Tagara release certificate (scripts/release-signing.sh); no script is ever downloaded and run.
 @MainActor @Observable
 final class Updater {
     enum Status: Equatable {
@@ -17,7 +19,6 @@ final class Updater {
     }
 
     private static let repo = "mateusfonsek/tagara"
-    private static let installer = "https://raw.githubusercontent.com/\(repo)/main/scripts/get.sh"
     private static let checkInterval = Duration.seconds(24 * 60 * 60)
 
     private(set) var status: Status = .idle
@@ -32,6 +33,7 @@ final class Updater {
     }
 
     private var loop: Task<Void, Never>?
+    private var latestDMG: URL?
 
     init() {
         current = AppVersion(currentText)
@@ -65,32 +67,26 @@ final class Updater {
             request.setValue("Tagara/\(currentText)", forHTTPHeaderField: "User-Agent")
             let (data, response) = try await URLSession.shared.data(for: request)
             guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
-            let release = try JSONDecoder().decode(Release.self, from: data)
-            guard let latest = AppVersion(release.tagName) else { throw URLError(.cannotParseResponse) }
-            status = latest > current ? .available(latest.description) : .upToDate
+            let release = try LatestRelease.parse(data)
+            latestDMG = release.dmg
+            status = release.version > current && release.dmg != nil ? .available(release.version.description) : .upToDate
         } catch {
             status = .failed("Não consegui verificar agora.")
         }
     }
 
-    /// Runs the installer, which quits this app, replaces it in place and reopens it.
+    /// Downloads and checks the new version, then quits; a small helper swaps the app and reopens it.
     func install() {
+        guard let dmg = latestDMG else { return }
         status = .installing
-        let folder = Bundle.main.bundleURL.deletingLastPathComponent().path
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/bash")
-        process.arguments = ["-c", "curl -fsSL \(Self.installer) | DEST='\(folder)' bash"]
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-        do {
-            try process.run()
-        } catch {
-            status = .failed("Não consegui iniciar a atualização.")
+        Task {
+            do {
+                let staged = try await UpdateInstaller.download(dmg)
+                try UpdateInstaller.swapAfterQuit(Bundle.main.bundleURL, with: staged)
+                NSApp.terminate(nil)
+            } catch {
+                status = .failed("A atualização falhou. Tenta de novo?")
+            }
         }
-    }
-
-    private struct Release: Decodable {
-        let tagName: String
-        enum CodingKeys: String, CodingKey { case tagName = "tag_name" }
     }
 }

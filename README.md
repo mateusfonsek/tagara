@@ -35,7 +35,7 @@ A diferença para os apps de ditado mais conhecidos é que **nada sai do seu Mac
 - **Em qualquer app.** Escreve onde está o cursor e devolve a sua área de transferência como estava.
 - **Mãos livres.** Toque duas vezes no ⌥ para ditar textos longos sem segurar a tecla; um toque termina.
 - **Escolha o microfone.** Nos Ajustes ou direto na barra de menu. Se ele for desconectado, o Tagara volta para o padrão do sistema e retoma a escolha quando ele reaparece.
-- **Atualiza sozinho.** O app avisa quando sai uma versão nova e se atualiza com um clique.
+- **Atualiza sozinho.** O app avisa quando sai uma versão nova e se atualiza com um clique, instalando só versões assinadas pelo certificado do Tagara.
 - **Histórico local.** Os últimos 50 ditados ficam numa aba própria, com busca, para copiar de novo o que se perdeu. Dá para desligar.
 - **Nativo.** SwiftUI, barra de menu, ícone Liquid Glass do macOS 26 e modo claro e escuro do sistema.
 

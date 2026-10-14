@@ -5,7 +5,9 @@
 /// means the user is typing a shortcut, so the dictation is cancelled.
 public struct HotkeyStateMachine: Sendable {
     public enum Input: Sendable { case triggerDown, triggerUp, otherKey, escape, tick }
-    public enum Output: Sendable, Equatable { case press, release, cancel, lock }
+    /// `restart`: drop the recording in progress and start a new one (a press that came just
+    /// after the double-tap window closed, before the tick that would have cancelled the tap).
+    public enum Output: Sendable, Equatable { case press, release, cancel, lock, restart }
 
     /// A press shorter than this counts as a tap, not a hold.
     public static let tapMaximum = 0.3
@@ -62,7 +64,7 @@ public struct HotkeyStateMachine: Sendable {
         case (.awaitingSecondTap(let until), .triggerDown):
             guard time <= until else {
                 state = .holding(since: time)
-                return .press
+                return .restart
             }
             state = .lockingKeyDown(since: time)
             return .lock

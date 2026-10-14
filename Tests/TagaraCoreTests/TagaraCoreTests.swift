@@ -58,6 +58,16 @@ import Testing
         #expect(sm.deadline == nil)
     }
 
+    @Test func lateSecondPressRestartsInsteadOfReusingTheTapRecording() {
+        var sm = HotkeyStateMachine()
+        _ = sm.handle(.triggerDown, at: 0)
+        _ = sm.handle(.triggerUp, at: 0.1)
+        // The window closed, but the tick that would cancel the tap hasn't fired yet.
+        let late = 0.1 + HotkeyStateMachine.doubleTapWindow + 0.005
+        #expect(sm.handle(.triggerDown, at: late) == .restart)
+        #expect(sm.handle(.triggerUp, at: late + 1) == .release)
+    }
+
     @Test func escapeCancelsHandsFree() {
         var sm = HotkeyStateMachine()
         _ = sm.handle(.triggerDown, at: 0)
@@ -289,5 +299,44 @@ import Testing
     @Test func disconnectedChoiceWithoutASavedNameStillShowsUp() {
         let options = MicrophoneChoice.options(chosen: yeti.uid, chosenName: nil, available: [])
         #expect(options == [MicrophoneOption(uid: yeti.uid, name: yeti.uid, isConnected: false)])
+    }
+}
+
+@Suite struct PasteTargetTests {
+    @Test func pastesWhenTheSameAppIsStillInFront() {
+        #expect(PasteTarget.decide(startedIn: 42, frontmostNow: 42) == .paste)
+    }
+
+    @Test func onlyCopiesWhenAnotherAppCameToTheFront() {
+        #expect(PasteTarget.decide(startedIn: 42, frontmostNow: 7) == .copyOnly)
+        #expect(PasteTarget.decide(startedIn: 42, frontmostNow: nil) == .copyOnly)
+    }
+
+    @Test func pastesWhenTheStartingAppIsUnknown() {
+        #expect(PasteTarget.decide(startedIn: nil, frontmostNow: 7) == .paste)
+    }
+}
+
+@Suite struct LatestReleaseTests {
+    let dmg = "https://github.com/mateusfonsek/tagara/releases/download/v0.1.5/Tagara-0.1.5.dmg"
+
+    func json(_ tag: String, _ assets: [(String, String)]) -> Data {
+        let list = assets.map { #"{"name":"\#($0.0)","browser_download_url":"\#($0.1)"}"# }.joined(separator: ",")
+        return Data(#"{"tag_name":"\#(tag)","assets":[\#(list)]}"#.utf8)
+    }
+
+    @Test func readsTheVersionAndTheDMG() throws {
+        let release = try LatestRelease.parse(json("v0.1.5", [("checksums.txt", "https://x/c.txt"), ("Tagara-0.1.5.dmg", dmg)]))
+        #expect(release.version == AppVersion(major: 0, minor: 1, patch: 5))
+        #expect(release.dmg?.absoluteString == dmg)
+    }
+
+    @Test func ignoresNonHTTPSDownloads() throws {
+        let release = try LatestRelease.parse(json("v0.1.5", [("Tagara.dmg", "http://example.com/Tagara.dmg")]))
+        #expect(release.dmg == nil)
+    }
+
+    @Test func rejectsATagThatIsNotAVersion() {
+        #expect(throws: (any Error).self) { try LatestRelease.parse(json("nightly", [("Tagara.dmg", dmg)])) }
     }
 }

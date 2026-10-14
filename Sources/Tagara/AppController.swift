@@ -63,6 +63,8 @@ final class AppController {
     private let recorder = AudioRecorder()
     @ObservationIgnored private lazy var overlay = OverlayController(controller: self)
     private var recordingStartedAt = Date()
+    /// The app in front when recording began: the only one the text may be pasted into.
+    private var recordingApp: NSRunningApplication?
     private var noticeTask: Task<Void, Never>?
 
     private init() {
@@ -159,6 +161,9 @@ final class AppController {
         case .release: finishRecording()
         case .cancel: cancelRecording()
         case .lock: if phase == .recording { handsFree = true }
+        case .restart:
+            cancelRecording()
+            beginRecording()
         }
     }
 
@@ -179,6 +184,7 @@ final class AppController {
             return
         }
         recordingStartedAt = Date()
+        recordingApp = NSWorkspace.shared.frontmostApplication
         phase = .recording
         play("Tink")
         overlay.show()
@@ -205,9 +211,18 @@ final class AppController {
             do {
                 let transcriber = try await models.ensureLoaded()
                 let text = TextCleanup.clean(try await transcriber.transcribe(samples))
+                var switchedApps = false
                 if !text.isEmpty {
-                    let app = NSWorkspace.shared.frontmostApplication?.localizedName
-                    TextInserter.insert(text)
+                    let app = recordingApp?.localizedName
+                    switch PasteTarget.decide(
+                        startedIn: recordingApp?.processIdentifier,
+                        frontmostNow: NSWorkspace.shared.frontmostApplication?.processIdentifier)
+                    {
+                    case .paste: TextInserter.insert(text)
+                    case .copyOnly:
+                        copy(text)
+                        switchedApps = true
+                    }
                     lastTranscript = text
                     if historyEnabled {
                         history.add(text: text, app: app)
@@ -218,6 +233,7 @@ final class AppController {
                     play("Pop")
                 }
                 endSession()
+                if switchedApps { showNotice("Você trocou de app. O texto ficou copiado, é só ⌘V.") }
             } catch {
                 endSession()
                 showNotice("Não consegui escrever essa. Tenta de novo?")
