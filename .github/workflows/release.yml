@@ -46,8 +46,40 @@ jobs:
         id: version
         run: echo "version=$(cat VERSION).${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
+      # Every release is signed with the same certificate (scripts/release-signing.sh), so macOS
+      # keeps the Microphone and Accessibility grants across updates. Without the secrets
+      # (pull requests from forks) bundle.sh falls back to ad-hoc signing.
+      - name: Importar certificado
+        id: signing
+        env:
+          P12: ${{ secrets.SIGNING_CERT_P12 }}
+          PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          if [ -z "$P12" ]; then echo "Sem certificado: assinatura ad-hoc."; exit 0; fi
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          echo "identity=Tagara Release" >> "$GITHUB_OUTPUT"
+
       - name: Gerar DMG
+        env:
+          IDENTITY: ${{ steps.signing.outputs.identity || 'none' }}
         run: VERSION=${{ steps.version.outputs.version }} scripts/dmg.sh
+
+      - name: Conferir assinatura
+        if: steps.signing.outputs.identity != ''
+        run: |
+          hdiutil attach dist/*.dmg -nobrowse -readonly -mountpoint "$RUNNER_TEMP/dmg" -quiet
+          codesign -dvv "$RUNNER_TEMP/dmg/Tagara.app" 2>&1 | grep "Authority=Tagara Release"
+          codesign -d -r- "$RUNNER_TEMP/dmg/Tagara.app" 2>&1 | grep "certificate leaf"
+          hdiutil detach "$RUNNER_TEMP/dmg" -quiet
 
       - name: Guardar DMG do build
         uses: actions/upload-artifact@v4

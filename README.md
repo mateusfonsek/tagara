@@ -66,7 +66,7 @@ O [instalador](scripts/get.sh) baixa a última release, instala o Tagara em **Ap
 Na janela do Tagara, permita o **Microfone** e a **Acessibilidade** e baixe o **modelo de voz** (cerca de 630 MB, uma vez só). Pronto: segure **⌥ direito**, fale e solte.
 
 > [!NOTE]
-> Cada versão nova é uma nova assinatura para o macOS, então ele pode pedir as permissões de novo depois de atualizar. Compilando localmente com `scripts/setup-signing.sh`, as permissões ficam guardadas entre builds.
+> As releases são assinadas sempre com o mesmo certificado próprio, então o macOS guarda as permissões entre atualizações. Compilando localmente, rode `scripts/setup-signing.sh` uma vez para ter o mesmo efeito entre builds.
 
 ## Requisitos
 
