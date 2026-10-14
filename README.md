@@ -42,17 +42,28 @@ A diferença para os apps de ditado mais conhecidos é que **nada sai do seu Mac
 
 ## Instalação
 
+### Pelo Terminal (recomendado)
+
+Cole no Terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mateusfonsek/tagara/main/scripts/get.sh | bash
+```
+
+O [instalador](scripts/get.sh) baixa a última release, instala o Tagara em **Aplicativos** (substituindo a versão anterior, se houver) e abre o app. Como o download é feito pelo Terminal, o macOS não bloqueia a primeira abertura. Para **atualizar**, rode o mesmo comando de novo.
+
+### Pelo DMG
+
 1. Baixe o `Tagara-x.y.z.dmg` da [última release](https://github.com/mateusfonsek/tagara/releases/latest).
 2. Abra o DMG e arraste o **Tagara** para **Aplicativos**.
-3. **Primeira abertura.** O Tagara ainda não é assinado com um certificado de desenvolvedor da Apple, então o macOS vai bloquear a primeira abertura. Para liberar, escolha um dos caminhos:
-   - Em **Ajustes do Sistema → Privacidade e Segurança**, clique em **Abrir mesmo assim**; ou
-   - no Terminal: `xattr -dr com.apple.quarantine /Applications/Tagara.app`
-4. Na janela do Tagara, permita o **Microfone** e a **Acessibilidade** e baixe o **modelo de voz** (cerca de 630 MB, uma vez só).
+3. Na primeira abertura, o macOS bloqueia o app, porque ele ainda não é assinado com um certificado de desenvolvedor da Apple. Libere em **Ajustes do Sistema → Privacidade e Segurança → Abrir mesmo assim**, ou no Terminal: `xattr -dr com.apple.quarantine /Applications/Tagara.app`
 
-Pronto: segure **⌥ direito**, fale e solte.
+### Primeira vez
+
+Na janela do Tagara, permita o **Microfone** e a **Acessibilidade** e baixe o **modelo de voz** (cerca de 630 MB, uma vez só). Pronto: segure **⌥ direito**, fale e solte.
 
 > [!NOTE]
-> Cada atualização instalada pelo DMG é uma nova assinatura para o macOS, então ele pode pedir as permissões de novo. Compilando localmente com `scripts/setup-signing.sh`, as permissões ficam guardadas entre builds.
+> Cada versão nova é uma nova assinatura para o macOS, então ele pode pedir as permissões de novo depois de atualizar. Compilando localmente com `scripts/setup-signing.sh`, as permissões ficam guardadas entre builds.
 
 ## Requisitos
 
@@ -115,7 +126,7 @@ Sources/Tagara/       app: barra de menu, janela, pílula, tecla, áudio, transc
 Sources/TagaraCore/   lógica pura e testada: tecla, estatísticas, histórico, barras
 Tests/                testes (Swift Testing)
 Resources/            Info.plist, ícone (.icon do Icon Composer) e cor de destaque
-scripts/              bundle, install, dmg e certificado local
+scripts/              instalador (get.sh), bundle, install, dmg e certificado local
 docs/                 brand guidelines
 ```
 
