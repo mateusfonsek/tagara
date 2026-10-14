@@ -1,0 +1,42 @@
+---
+import { RELEASES_URL } from '../lib/constants';
+
+interface Props {
+  label: string;
+  versionTemplate: string;
+  size?: 'md' | 'lg';
+}
+const { label, versionTemplate, size = 'md' } = Astro.props;
+---
+<a class:list={['btn', 'btn--primary', size === 'lg' && 'download--lg']} href={RELEASES_URL} data-download data-template={versionTemplate}>
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+  <span data-download-label>{label}</span>
+</a>
+
+<script>
+  import { downloadLabel, fetchLatestRelease } from '../lib/release';
+
+  // One request for every download button on the page; on failure they keep the releases link.
+  const buttons = [...document.querySelectorAll<HTMLAnchorElement>('[data-download]')];
+  if (buttons.length > 0) {
+    fetchLatestRelease().then((release) => {
+      if (!release) return;
+      for (const button of buttons) {
+        button.href = release.url;
+        const label = button.querySelector('[data-download-label]');
+        const template = button.dataset.template;
+        if (label && template) label.textContent = downloadLabel(template, release.version);
+      }
+    });
+  }
+</script>
+
+<style>
+  .download--lg {
+    min-height: 56px;
+    padding-inline: 1.75rem;
+    font-size: 1.125rem;
+  }
+</style>

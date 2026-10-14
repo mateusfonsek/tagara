@@ -1,0 +1,84 @@
+---
+import CopyCommand from './CopyCommand.astro';
+import DownloadButton from './DownloadButton.astro';
+import type { Strings } from '../i18n/types';
+import { INSTALL_COMMAND } from '../lib/constants';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+---
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <h1 class="hero__title" data-reveal>{s.hero.title}</h1>
+      <p class="hero__subtitle" data-reveal style="--delay: 100ms">{s.hero.subtitle}</p>
+      <div class="hero__actions" data-reveal style="--delay: 200ms">
+        <DownloadButton label={s.hero.download} versionTemplate={s.hero.downloadVersion} size="lg" />
+        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} />
+      </div>
+      <p class="hero__requirements" data-reveal style="--delay: 300ms">{s.hero.requirements}</p>
+    </div>
+    <div class="hero__demo" data-reveal style="--delay: 250ms">
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(48px, 8vw, 104px) clamp(64px, 9vw, 120px);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: clamp(40px, 6vw, 64px);
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+  }
+
+  .hero__copy {
+    min-width: 0;
+  }
+
+  .hero__title {
+    font-size: clamp(2.75rem, 7.5vw, 5.25rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  .hero__subtitle {
+    margin-top: 1.25rem;
+    max-width: 34ch;
+    font-size: clamp(1.125rem, 2vw, 1.3125rem);
+    color: var(--text-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.875rem;
+    margin-top: 2rem;
+    max-width: 30rem;
+  }
+
+  .hero__actions > :global(.copy) {
+    width: 100%;
+  }
+
+  .hero__requirements {
+    margin-top: 2.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .hero__demo {
+    min-width: 0;
+  }
+</style>

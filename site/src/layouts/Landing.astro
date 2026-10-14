@@ -3,6 +3,7 @@ import '../styles/global.css';
 import nextFont from '../assets/fonts/AtkinsonHyperlegibleNext.woff2?url';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
 import { strings } from '../i18n';
 import type { Lang } from '../i18n/types';
 import { localeHref, withBase } from '../lib/paths';
@@ -54,6 +55,7 @@ const ogImage = url(withBase(base, `og-${lang}.png`));
     <a class="skip-link" href="#main">{s.nav.skip}</a>
     <Header s={s} />
     <main id="main">
+      <Hero s={s} />
     </main>
     <Footer s={s} />
     <script>
