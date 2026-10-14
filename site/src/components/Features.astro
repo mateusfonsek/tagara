@@ -1,0 +1,391 @@
+---
+import Keycap from './Keycap.astro';
+import Pill from './Pill.astro';
+import type { FeatureId, Strings } from '../i18n/types';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+const f = s.features;
+const item = (id: FeatureId) => f.items.find((i) => i.id === id)!;
+const order: FeatureId[] = ['offline', 'fast', 'bilingual', 'handsfree', 'anyapp', 'history'];
+---
+<section class="section features" id="features">
+  <div class="container">
+    <h2 class="section-title" data-reveal>{f.title}</h2>
+
+    <div class="features__grid">
+      {order.map((id, index) => (
+        <article class:list={['feature', 'card', `feature--${id}`]} data-reveal style={`--delay: ${(index % 3) * 90}ms`}>
+          <div class="feature__visual" aria-hidden="true">
+            {id === 'offline' && (
+              <div class="offline">
+                <svg class="offline__wifi" viewBox="0 0 48 48" width="48" height="48">
+                  <path d="M6 18a26 26 0 0 1 36 0M12 25a17 17 0 0 1 24 0M18 32a8 8 0 0 1 12 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+                  <circle cx="24" cy="38" r="2.6" fill="currentColor" />
+                  <path class="offline__slash" d="M9 9l30 30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" pathLength="1" />
+                </svg>
+                <Pill listening={s.demo.listening} typing={s.demo.typing} />
+              </div>
+            )}
+            {id === 'fast' && (
+              <div class="fast">
+                <p class="fast__value">{f.fastValue}</p>
+                <div class="fast__track"><span class="fast__fill"></span></div>
+                <p class="fast__labels"><span>{f.fastFrom}</span><span>{f.fastTo}</span></p>
+              </div>
+            )}
+            {id === 'bilingual' && (
+              <div class="bilingual">
+                {f.bilingualSamples.map((sample, i) => (
+                  <p class="bilingual__line" style={`--i: ${i}`}>{sample}</p>
+                ))}
+              </div>
+            )}
+            {id === 'handsfree' && (
+              <div class="handsfree"><Keycap /></div>
+            )}
+            {id === 'anyapp' && (
+              <div class="anyapp">
+                {f.anyappFields.map((field, i) => (
+                  <p class:list={['anyapp__field', i === 2 && 'anyapp__field--mono']}>
+                    <span class="anyapp__hint">{field}</span>
+                    {i === 2 && <span class="anyapp__cursor"></span>}
+                  </p>
+                ))}
+              </div>
+            )}
+            {id === 'history' && (
+              <ul class="history">
+                {f.historySamples.map((sample, i) => (
+                  <li class="history__entry" style={`--i: ${i}`}>{sample}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <h3>{item(id).title}</h3>
+          <p>{item(id).text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: clamp(32px, 5vw, 56px);
+  }
+
+  @media (min-width: 800px) {
+    .features__grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .feature--offline {
+      grid-column: span 4;
+    }
+
+    .feature--fast {
+      grid-column: span 2;
+    }
+
+    .feature--bilingual,
+    .feature--handsfree,
+    .feature--anyapp {
+      grid-column: span 2;
+    }
+
+    .feature--history {
+      grid-column: span 6;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+      grid-template-areas: 'title visual' 'text visual';
+      column-gap: 2rem;
+      align-content: center;
+    }
+
+    .feature--history h3 {
+      grid-area: title;
+      align-self: end;
+    }
+
+    .feature--history p {
+      grid-area: text;
+    }
+
+    .feature--history .feature__visual {
+      grid-area: visual;
+      margin-bottom: 0;
+    }
+  }
+
+  .feature {
+    padding: 1.5rem;
+    min-width: 0;
+  }
+
+  .feature h3 {
+    font-size: 1.25rem;
+    font-weight: 750;
+  }
+
+  .feature p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  .feature__visual {
+    display: grid;
+    place-items: center;
+    min-height: 9.5rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-sunken);
+    overflow: hidden;
+  }
+
+  /* offline: Wi-Fi goes out, the bars keep going */
+  .offline {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .offline__wifi {
+    color: var(--text-muted);
+    opacity: 0.35;
+  }
+
+  .offline__slash {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .feature--offline.is-visible .offline__wifi {
+    animation: tg-dim 0.4s var(--ease) 0.6s both;
+  }
+
+  .feature--offline.is-visible .offline__slash {
+    animation: tg-draw 0.4s var(--ease) 0.9s both;
+  }
+
+  .feature--offline :global(.pill__bars i) {
+    animation-iteration-count: 10 !important;
+  }
+
+  .feature--offline:not(.is-visible) :global(.pill__bars i) {
+    animation-play-state: paused !important;
+  }
+
+  /* fast: the bar takes exactly 0.3 s, the real time */
+  .fast {
+    width: min(100%, 16rem);
+  }
+
+  .fast__value {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .fast__track {
+    height: 6px;
+    margin-top: 0.75rem;
+    border-radius: 3px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .fast__fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: left;
+  }
+
+  .feature--fast.is-visible .fast__fill {
+    animation: tg-fill 0.3s linear 0.8s both;
+  }
+
+  .fast__labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.8125rem;
+  }
+
+  /* bilingual: two mixed sentences arrive in turn */
+  .bilingual {
+    display: grid;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .bilingual__line {
+    margin: 0;
+    padding: 0.55rem 0.8rem;
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-raised);
+    font-family: var(--tg-font-transcricao);
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+
+  .feature--bilingual.is-visible .bilingual__line {
+    animation: tg-rise 0.4s var(--ease) both;
+    animation-delay: calc(0.5s + var(--i) * 0.7s);
+  }
+
+  /* hands-free: double tap */
+  .feature--handsfree.is-visible :global(.key) {
+    animation: tg-double-tap 1.4s var(--ease) 0.6s 2 both;
+  }
+
+  /* any app: the cursor visits each field and stays in the last one */
+  .anyapp {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .anyapp__field {
+    margin: 0;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-raised);
+    font-size: 0.8125rem;
+  }
+
+  .anyapp__field--mono {
+    border-radius: var(--tg-radius-campo);
+    font-family: var(--tg-font-transcricao);
+  }
+
+  .feature--anyapp.is-visible .anyapp__field {
+    animation: tg-focus 0.9s var(--ease) both;
+  }
+
+  .feature--anyapp.is-visible .anyapp__field:nth-child(1) {
+    animation-delay: 0.4s;
+  }
+
+  .feature--anyapp.is-visible .anyapp__field:nth-child(2) {
+    animation-delay: 1.3s;
+  }
+
+  .feature--anyapp.is-visible .anyapp__field:nth-child(3) {
+    animation: tg-focus-stay 0.4s var(--ease) 2.2s both;
+  }
+
+  .anyapp__field--mono {
+    border-color: var(--accent-text);
+  }
+
+  .anyapp__cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 0.35rem;
+    vertical-align: text-bottom;
+    background: var(--accent-text);
+  }
+
+  /* history: entries drop in, newest first */
+  .history {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .history__entry {
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-raised);
+    font-family: var(--tg-font-transcricao);
+    font-size: 0.875rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feature--history.is-visible .history__entry {
+    animation: tg-drop 0.45s var(--ease) both;
+    animation-delay: calc(0.3s + var(--i) * 0.18s);
+  }
+
+  @keyframes tg-dim {
+    from {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tg-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  @keyframes tg-fill {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes tg-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes tg-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes tg-double-tap {
+    0%,
+    100%,
+    25%,
+    55% {
+      transform: none;
+    }
+    12%,
+    40% {
+      transform: translateY(3px);
+      box-shadow:
+        0 1px 0 var(--key-edge),
+        0 3px 8px rgb(0 0 0 / 0.1);
+    }
+  }
+
+  @keyframes tg-focus {
+    0%,
+    100% {
+      border-color: var(--line);
+    }
+    20%,
+    80% {
+      border-color: var(--accent-text);
+    }
+  }
+
+  @keyframes tg-focus-stay {
+    from {
+      border-color: var(--line);
+    }
+  }
+</style>
