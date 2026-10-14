@@ -1,0 +1,133 @@
+---
+import Keycap from './Keycap.astro';
+import Pill from './Pill.astro';
+import type { Strings } from '../i18n/types';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+const [hold, speak, release] = s.how.steps;
+---
+<section class="section how">
+  <div class="container">
+    <h2 class="section-title" data-reveal>{s.how.title}</h2>
+    <p class="lead" data-reveal style="--delay: 80ms">{s.how.lead}</p>
+
+    <ol class="how__steps">
+      <li class="how__step card how__step--hold" data-reveal>
+        <div class="how__visual"><Keycap /></div>
+        <h3>{hold.title}</h3>
+        <p>{hold.text}</p>
+      </li>
+      <li class="how__step card how__step--speak" data-reveal style="--delay: 120ms">
+        <div class="how__visual"><Pill listening={s.demo.listening} typing={s.demo.typing} /></div>
+        <h3>{speak.title}</h3>
+        <p>{speak.text}</p>
+      </li>
+      <li class="how__step card how__step--release" data-reveal style="--delay: 240ms">
+        <div class="how__visual">
+          <p class="how__field"><span class="how__result">{s.how.result}</span><span class="how__cursor"></span></p>
+        </div>
+        <h3>{release.title}</h3>
+        <p>{release.text}</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how__steps {
+    display: grid;
+    gap: 1rem;
+    margin: clamp(32px, 5vw, 56px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 800px) {
+    .how__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .how__step {
+    padding: 1.5rem;
+  }
+
+  .how__step h3 {
+    margin-top: 1.25rem;
+    font-size: 1.375rem;
+    font-weight: 750;
+  }
+
+  .how__step p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  .how__visual {
+    display: grid;
+    place-items: center;
+    height: 9rem;
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-sunken);
+  }
+
+  /* hold: the key goes down and stays down a moment */
+  .how__step--hold.is-visible :global(.key) {
+    animation: tg-press 1.6s var(--ease) 0.5s 2 both;
+  }
+
+  /* speak: bars move for a few seconds, then rest */
+  .how__step--speak :global(.pill__bars i) {
+    animation-iteration-count: 8 !important;
+  }
+
+  .how__step--speak:not(.is-visible) :global(.pill__bars i) {
+    animation-play-state: paused !important;
+  }
+
+  /* release: the sentence lands at once */
+  .how__field {
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-raised);
+    font-family: var(--tg-font-transcricao);
+    font-size: 0.9375rem;
+  }
+
+  .how__step--release.is-visible .how__result {
+    animation: tg-paste 0.25s var(--ease) 1.2s both;
+  }
+
+  .how__cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--accent-text);
+  }
+
+  @keyframes tg-press {
+    0%,
+    100% {
+      transform: none;
+    }
+    15%,
+    70% {
+      transform: translateY(3px);
+      box-shadow:
+        0 1px 0 var(--key-edge),
+        0 3px 8px rgb(0 0 0 / 0.1);
+    }
+  }
+
+  @keyframes tg-paste {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

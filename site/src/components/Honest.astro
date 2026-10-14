@@ -1,0 +1,95 @@
+---
+import type { Strings } from '../i18n/types';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+---
+<section class="section honest">
+  <div class="container">
+    <h2 class="section-title" data-reveal>{s.honest.title}</h2>
+    <div class="honest__grid">
+      <div class="honest__price card" data-reveal>
+        <p class="honest__value">{s.honest.price}</p>
+        <p class="honest__note">{s.honest.priceNote}</p>
+      </div>
+      <div class="honest__not card" data-reveal style="--delay: 120ms">
+        <h3>{s.honest.notTitle}</h3>
+        <ul>
+          {s.honest.not.map((line) => <li>{line}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .honest__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: clamp(32px, 5vw, 56px);
+  }
+
+  @media (min-width: 800px) {
+    .honest__grid {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+  }
+
+  .honest__price,
+  .honest__not {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .honest__price {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: var(--tg-grafite);
+    border-color: transparent;
+    color: var(--tg-sobre-grafite);
+  }
+
+  .honest__value {
+    font-size: clamp(4rem, 10vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .honest__note {
+    margin-top: 1rem;
+    max-width: 24ch;
+    font-size: 1.125rem;
+    color: #b9c0b1;
+  }
+
+  .honest__not h3 {
+    font-size: 1.25rem;
+    font-weight: 750;
+  }
+
+  .honest__not ul {
+    display: grid;
+    gap: 0.9rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .honest__not li {
+    position: relative;
+    padding-left: 2rem;
+    color: var(--text-muted);
+  }
+
+  .honest__not li::before {
+    content: '✕';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent-text);
+    font-weight: 800;
+  }
+</style>

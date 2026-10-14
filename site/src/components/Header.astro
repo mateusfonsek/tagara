@@ -1,0 +1,90 @@
+---
+import BarsLogo from './BarsLogo.astro';
+import { otherLang } from '../i18n';
+import type { Strings } from '../i18n/types';
+import { REPO_URL } from '../lib/constants';
+import { localeHref } from '../lib/paths';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const other = otherLang(s.lang);
+---
+<header class="header">
+  <div class="container header__inner">
+    <a class="header__brand" href={localeHref(base, s.lang)}>
+      <BarsLogo size={26} />
+      <span>Tagara</span>
+    </a>
+    <nav class="header__nav" aria-label={s.nav.label}>
+      <a class="header__section" href="#features">{s.nav.features}</a>
+      <a class="header__section" href="#privacy">{s.nav.privacy}</a>
+      <a class="header__section" href="#faq">{s.nav.faq}</a>
+      <a href={localeHref(base, other)} hreflang={other === 'pt' ? 'pt-BR' : 'en'} aria-label={`${s.nav.otherLang} · ${s.nav.otherLangLabel}`}>
+        {s.nav.otherLang}
+      </a>
+      <a class="btn btn--ghost header__github" href={REPO_URL}>GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 64px;
+  }
+
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2.5vw, 1.75rem);
+  }
+
+  .header__nav a:not(.btn) {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .header__nav a:not(.btn):hover {
+    color: var(--text);
+  }
+
+  .header__github {
+    min-height: 38px;
+    padding-inline: 1rem;
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 640px) {
+    .header__section {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+import type { Strings } from '../i18n/types';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+---
+<section class="section faq" id="faq">
+  <div class="container faq__inner">
+    <h2 class="section-title" data-reveal>{s.faq.title}</h2>
+    <div class="faq__list" data-reveal style="--delay: 80ms">
+      {s.faq.items.map((item) => (
+        <details class="faq__item">
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq__inner {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .faq__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+  }
+
+  .faq__item {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq__item summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1.1rem;
+    font-size: 1.125rem;
+    font-weight: 650;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__item summary::after {
+    content: '+';
+    flex: none;
+    color: var(--accent-text);
+    font-weight: 800;
+    transition: transform 0.25s var(--ease);
+  }
+
+  .faq__item[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .faq__item p {
+    padding-bottom: 1.25rem;
+    max-width: 62ch;
+    color: var(--text-muted);
+  }
+
+  /* Smooth open where supported; elsewhere it simply snaps open. */
+  .faq__item::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.3s var(--ease),
+      content-visibility 0.3s allow-discrete;
+  }
+
+  .faq__item[open]::details-content {
+    block-size: auto;
+  }
+</style>

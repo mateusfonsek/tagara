@@ -1,0 +1,156 @@
+---
+import type { Strings } from '../i18n/types';
+import { REPO_URL } from '../lib/constants';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+---
+<section class="section section--dark privacy" id="privacy">
+  <div class="container privacy__inner">
+    <div>
+      <h2 class="section-title" data-reveal>{s.privacy.title}</h2>
+      <p class="lead" data-reveal style="--delay: 80ms">{s.privacy.lead}</p>
+      <p class="privacy__link" data-reveal style="--delay: 160ms">
+        <a href={REPO_URL}>{s.privacy.codeLink} →</a>
+      </p>
+    </div>
+
+    <div class="privacy__diagram" data-reveal style="--delay: 120ms">
+      <div class="privacy__mac">
+        <p class="privacy__boundary">{s.privacy.boundary}</p>
+        <ol class="privacy__flow">
+          {s.privacy.flow.map((node, i) => <li style={`--i: ${i}`}>{node}</li>)}
+        </ol>
+        <span class="privacy__pulse" aria-hidden="true"></span>
+      </div>
+      <div class="privacy__cloud" aria-hidden="true">
+        <svg viewBox="0 0 48 32" width="48" height="32">
+          <path d="M14 28h22a9 9 0 0 0 0-18 12 12 0 0 0-23 3A7.5 7.5 0 0 0 14 28z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+          <path d="M6 4l36 26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        <span>{s.privacy.cloud}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .privacy__inner {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .privacy__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .privacy__link {
+    margin-top: 1.5rem;
+    font-weight: 650;
+  }
+
+  .privacy__diagram {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .privacy__mac {
+    position: relative;
+    flex: 1;
+    padding: 1.25rem 1.25rem 1.5rem;
+    border: 1.5px solid rgb(241 244 236 / 0.35);
+    border-radius: 18px;
+  }
+
+  .privacy__boundary {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    font-weight: 650;
+    color: var(--text-muted);
+  }
+
+  .privacy__flow {
+    position: relative;
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* the wire connecting the nodes */
+  .privacy__flow::before {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: 1rem;
+    bottom: 1rem;
+    width: 2px;
+    background: rgb(241 244 236 / 0.2);
+  }
+
+  .privacy__flow li {
+    position: relative;
+    padding: 0.7rem 1rem 0.7rem 2.75rem;
+    border-radius: var(--tg-radius-campo);
+    background: var(--bg-raised);
+    font-weight: 600;
+  }
+
+  .privacy__flow li::before {
+    content: '';
+    position: absolute;
+    left: calc(1.25rem - 4px);
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--tg-violeta-claro);
+    transform: translateY(-50%);
+  }
+
+  /* a dot that travels down the wire and never leaves the Mac */
+  .privacy__pulse {
+    position: absolute;
+    left: calc(1.25rem + 1.25rem - 4px);
+    top: 4.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--tg-sobre-grafite);
+    opacity: 0;
+  }
+
+  .privacy__diagram.is-visible .privacy__pulse {
+    animation: tg-travel 2.4s var(--ease) 0.6s 3;
+  }
+
+  .privacy__cloud {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    color: rgb(241 244 236 / 0.4);
+    font-size: 0.8125rem;
+  }
+
+  @keyframes tg-travel {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    10%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(calc(3 * (2.9rem + 0.75rem)));
+    }
+  }
+</style>

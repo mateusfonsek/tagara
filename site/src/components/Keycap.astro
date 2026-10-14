@@ -1,0 +1,51 @@
+---
+interface Props {
+  pressed?: boolean;
+}
+const { pressed = false } = Astro.props;
+---
+<span class="key" data-pressed={pressed ? '' : undefined} aria-hidden="true">
+  <span class="key__glyph">⌥</span>
+  <span class="key__label">option</span>
+</span>
+
+<style>
+  .key {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 4.5em;
+    height: 4.5em;
+    padding: 0.55em 0.65em;
+    border: 1px solid var(--line);
+    border-radius: 0.7em;
+    background: linear-gradient(var(--key-top), var(--key-bottom));
+    color: var(--text);
+    font-family: var(--tg-font-marca);
+    box-shadow:
+      0 4px 0 var(--key-edge),
+      0 8px 18px rgb(0 0 0 / 0.12);
+    transition:
+      transform 0.12s var(--ease),
+      box-shadow 0.12s var(--ease);
+  }
+
+  .key__glyph {
+    font-size: 1.25em;
+    line-height: 1;
+  }
+
+  .key__label {
+    font-size: 0.7em;
+    color: var(--text-muted);
+  }
+
+  .key[data-pressed],
+  :global(.demo[data-phase='listening']) .key {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 var(--key-edge),
+      0 3px 8px rgb(0 0 0 / 0.1);
+  }
+</style>
