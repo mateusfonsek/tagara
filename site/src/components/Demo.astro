@@ -157,6 +157,13 @@ const scenes = s.demo.scenes;
     font-size: clamp(11px, 2.4cqi, 15px);
   }
 
+  /* Phones: a taller window so the caption floats below the text instead of over it. */
+  @container (max-width: 480px) {
+    .demo__window {
+      aspect-ratio: 4 / 3.6;
+    }
+  }
+
   .demo__scene {
     position: absolute;
     inset: 0;
@@ -324,7 +331,7 @@ const scenes = s.demo.scenes;
   }
 
   .demo__caption [data-word] {
-    opacity: 0.18;
+    opacity: 0;
     transition: opacity 0.2s var(--ease);
   }
 
@@ -342,6 +349,13 @@ const scenes = s.demo.scenes;
     transition:
       opacity 0.25s var(--ease),
       transform 0.25s var(--ease);
+  }
+
+  /* Hairline so the graphite pill stays visible over the graphite terminal. Not a glow. */
+  .demo__pill :global(.pill) {
+    box-shadow:
+      0 0 0 1px rgb(241 244 236 / 0.16),
+      0 8px 24px rgb(0 0 0 / 0.22);
   }
 
   .demo[data-phase='listening'] .demo__pill,

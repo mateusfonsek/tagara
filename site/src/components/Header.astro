@@ -22,7 +22,7 @@ const other = otherLang(s.lang);
       <a class="header__section" href="#features">{s.nav.features}</a>
       <a class="header__section" href="#privacy">{s.nav.privacy}</a>
       <a class="header__section" href="#faq">{s.nav.faq}</a>
-      <a href={localeHref(base, other)} hreflang={other === 'pt' ? 'pt-BR' : 'en'} aria-label={s.nav.otherLangLabel}>
+      <a href={localeHref(base, other)} hreflang={other === 'pt' ? 'pt-BR' : 'en'} aria-label={`${s.nav.otherLang} · ${s.nav.otherLangLabel}`}>
         {s.nav.otherLang}
       </a>
       <a class="btn btn--ghost header__github" href={REPO_URL}>GitHub</a>
