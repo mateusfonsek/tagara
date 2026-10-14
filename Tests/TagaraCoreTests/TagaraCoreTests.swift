@@ -3,37 +3,104 @@ import Testing
 @testable import TagaraCore
 
 @Suite struct HotkeyStateMachineTests {
-    @Test func pressThenReleaseEmitsPressAndRelease() {
+    @Test func holdAndReleaseDictates() {
         var sm = HotkeyStateMachine()
-        #expect(sm.handle(.triggerDown) == .press)
-        #expect(sm.handle(.triggerUp) == .release)
+        #expect(sm.handle(.triggerDown, at: 0) == .press)
+        #expect(sm.handle(.triggerUp, at: 1.2) == .release)
     }
 
     @Test func otherKeyWhileHoldingCancels() {
         var sm = HotkeyStateMachine()
-        _ = sm.handle(.triggerDown)
-        #expect(sm.handle(.otherKey) == .cancel)
-        #expect(sm.handle(.triggerUp) == nil)
+        _ = sm.handle(.triggerDown, at: 0)
+        #expect(sm.handle(.otherKey, at: 0.5) == .cancel)
+        #expect(sm.handle(.triggerUp, at: 0.6) == nil)
     }
 
     @Test func otherKeyWhenIdleIsIgnored() {
         var sm = HotkeyStateMachine()
-        #expect(sm.handle(.otherKey) == nil)
-        #expect(sm.handle(.triggerUp) == nil)
+        #expect(sm.handle(.otherKey, at: 0) == nil)
+        #expect(sm.handle(.triggerUp, at: 0.1) == nil)
     }
 
     @Test func repeatedDownDoesNotPressTwice() {
         var sm = HotkeyStateMachine()
-        _ = sm.handle(.triggerDown)
-        #expect(sm.handle(.triggerDown) == nil)
+        _ = sm.handle(.triggerDown, at: 0)
+        #expect(sm.handle(.triggerDown, at: 0.1) == nil)
     }
 
     @Test func worksAgainAfterCancel() {
         var sm = HotkeyStateMachine()
-        _ = sm.handle(.triggerDown)
-        _ = sm.handle(.otherKey)
-        _ = sm.handle(.triggerUp)
-        #expect(sm.handle(.triggerDown) == .press)
+        _ = sm.handle(.triggerDown, at: 0)
+        _ = sm.handle(.otherKey, at: 0.1)
+        _ = sm.handle(.triggerUp, at: 0.2)
+        #expect(sm.handle(.triggerDown, at: 1) == .press)
+    }
+
+    @Test func doubleTapLocksAndNextTapFinishes() {
+        var sm = HotkeyStateMachine()
+        #expect(sm.handle(.triggerDown, at: 0) == .press)
+        #expect(sm.handle(.triggerUp, at: 0.1) == nil)
+        #expect(sm.deadline == 0.1 + HotkeyStateMachine.doubleTapWindow)
+        #expect(sm.handle(.triggerDown, at: 0.25) == .lock)
+        #expect(sm.handle(.triggerUp, at: 0.3) == nil)
+        #expect(sm.handle(.otherKey, at: 5) == nil)
+        #expect(sm.handle(.triggerDown, at: 9) == .release)
+        #expect(sm.handle(.triggerUp, at: 9.1) == nil)
+        #expect(sm.handle(.triggerDown, at: 12) == .press)
+    }
+
+    @Test func singleQuickTapCancelsWhenTheWindowCloses() {
+        var sm = HotkeyStateMachine()
+        _ = sm.handle(.triggerDown, at: 0)
+        _ = sm.handle(.triggerUp, at: 0.1)
+        #expect(sm.handle(.tick, at: 0.2) == nil)
+        #expect(sm.handle(.tick, at: 0.1 + HotkeyStateMachine.doubleTapWindow + 0.01) == .cancel)
+        #expect(sm.deadline == nil)
+    }
+
+    @Test func escapeCancelsHandsFree() {
+        var sm = HotkeyStateMachine()
+        _ = sm.handle(.triggerDown, at: 0)
+        _ = sm.handle(.triggerUp, at: 0.1)
+        _ = sm.handle(.triggerDown, at: 0.2)
+        _ = sm.handle(.triggerUp, at: 0.25)
+        #expect(sm.handle(.escape, at: 3) == .cancel)
+        #expect(sm.handle(.triggerDown, at: 4) == .press)
+    }
+
+    @Test func handsFreeCanBeTurnedOff() {
+        var sm = HotkeyStateMachine()
+        sm.handsFreeEnabled = false
+        _ = sm.handle(.triggerDown, at: 0)
+        #expect(sm.handle(.triggerUp, at: 0.1) == .release)
+    }
+
+    @Test func handsFreeStopsAfterTheLimit() {
+        var sm = HotkeyStateMachine()
+        _ = sm.handle(.triggerDown, at: 0)
+        _ = sm.handle(.triggerUp, at: 0.1)
+        _ = sm.handle(.triggerDown, at: 0.2)
+        _ = sm.handle(.triggerUp, at: 0.25)
+        #expect(sm.deadline == 0.2 + HotkeyStateMachine.handsFreeLimit)
+        #expect(sm.handle(.tick, at: 0.2 + HotkeyStateMachine.handsFreeLimit) == .release)
+    }
+}
+
+@Suite struct AppVersionTests {
+    @Test func parsesTagsAndPlainVersions() {
+        #expect(AppVersion("v0.1.12") == AppVersion(major: 0, minor: 1, patch: 12))
+        #expect(AppVersion("0.2") == AppVersion(major: 0, minor: 2, patch: 0))
+    }
+
+    @Test func rejectsDevBuilds() {
+        #expect(AppVersion("dev") == nil)
+        #expect(AppVersion("") == nil)
+    }
+
+    @Test func comparesNumericallyNotAlphabetically() {
+        #expect(AppVersion("0.1.10")! > AppVersion("0.1.9")!)
+        #expect(AppVersion("1.0.0")! > AppVersion("0.9.99")!)
+        #expect(!(AppVersion("0.1.2")! > AppVersion("0.1.2")!))
     }
 }
 

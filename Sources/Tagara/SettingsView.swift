@@ -15,9 +15,17 @@ struct SettingsView: View {
                 Toggle("Sons ao começar e terminar", isOn: $controller.soundsEnabled)
             }
 
-            Section("Ditado") {
+            Section {
                 LabeledContent("Tecla para falar") { Keycap(symbol: "⌥", label: "direito") }
-                LabeledContent("Modelo de voz") {
+                Toggle("Toque duplo no ⌥ trava a gravação", isOn: $controller.handsFreeEnabled)
+            } header: {
+                Text("Tecla")
+            } footer: {
+                Text("Segure para falar e solte para escrever. Com o toque duplo, você pode soltar a tecla: um toque no ⌥ termina e Esc cancela.")
+            }
+
+            Section("Modelo de voz") {
+                LabeledContent("Modelo") {
                     Text("Parakeet Ultra, \(modelState)").foregroundStyle(.secondary)
                 }
                 Picker("Liberar memória do modelo após", selection: $models.unloadAfterMinutes) {
@@ -47,6 +55,8 @@ struct SettingsView: View {
                 }
                 if !controller.models.isDownloaded { ModelSetupRow() }
             }
+
+            UpdatesSection()
         }
         .formStyle(.grouped)
         .navigationTitle("Ajustes")
@@ -65,6 +75,50 @@ struct SettingsView: View {
         case .downloading: "baixando…"
         case .notDownloaded: "não baixado"
         case .failed: "com erro"
+        }
+    }
+}
+
+private struct UpdatesSection: View {
+    @Environment(AppController.self) private var controller
+
+    var body: some View {
+        @Bindable var updater = controller.updater
+        Section {
+            LabeledContent("Versão", value: updater.currentText)
+            if updater.status == .development {
+                Text("Build de desenvolvimento: não é atualizado pela release.")
+                    .foregroundStyle(.secondary)
+            } else {
+                Toggle("Procurar atualizações automaticamente", isOn: $updater.autoCheck)
+                HStack {
+                    Text(statusText).foregroundStyle(.secondary)
+                    Spacer()
+                    if let version = updater.availableVersion {
+                        Button("Atualizar para \(version)") { updater.install() }
+                            .buttonStyle(.borderedProminent)
+                    } else {
+                        Button("Procurar agora") { Task { await updater.check() } }
+                            .disabled(updater.status == .checking || updater.status == .installing)
+                    }
+                }
+            }
+        } header: {
+            Text("Atualizações")
+        } footer: {
+            Text("A verificação consulta as releases do Tagara no GitHub. Nenhum dado seu é enviado.")
+        }
+    }
+
+    private var statusText: String {
+        switch controller.updater.status {
+        case .idle: "Ainda não verificado"
+        case .checking: "Procurando…"
+        case .upToDate: "Você está na versão mais recente"
+        case .available(let version): "Versão \(version) disponível"
+        case .installing: "Atualizando… o Tagara vai reabrir"
+        case .failed(let message): message
+        case .development: ""
         }
     }
 }

@@ -33,6 +33,8 @@ A diferença para os apps de ditado mais conhecidos é que **nada sai do seu Mac
 - **Português e inglês.** O modelo reconhece o idioma a cada ditado, então dá para alternar frases em PT e EN.
 - **Leve.** Parado, usa 0% de CPU e o microfone fica fechado. O modelo sai da memória sozinho depois de alguns minutos sem uso e volta enquanto você fala.
 - **Em qualquer app.** Escreve onde está o cursor e devolve a sua área de transferência como estava.
+- **Mãos livres.** Toque duas vezes no ⌥ para ditar textos longos sem segurar a tecla; um toque termina.
+- **Atualiza sozinho.** O app avisa quando sai uma versão nova e se atualiza com um clique.
 - **Histórico local.** Os últimos 50 ditados ficam numa aba própria, com busca, para copiar de novo o que se perdeu. Dá para desligar.
 - **Nativo.** SwiftUI, barra de menu, ícone Liquid Glass do macOS 26 e modo claro e escuro do sistema.
 
@@ -79,11 +81,13 @@ Na janela do Tagara, permita o **Microfone** e a **Acessibilidade** e baixe o **
 | Ação | Como |
 |---|---|
 | Ditar | Segure **⌥ direito**, fale e solte |
+| Ditar sem segurar | Toque **duas vezes** no ⌥ e fale à vontade; **um toque** termina e escreve, **Esc** cancela |
 | Cancelar | Aperte qualquer outra tecla enquanto segura o ⌥ (atalhos com ⌥ continuam funcionando) |
 | Recuperar um texto | Menu do Tagara na barra de menu → **Copiar último ditado**, ou a aba **Histórico** |
-| Ajustes | Abrir ao iniciar o Mac, sons, histórico e quanto tempo o modelo fica na memória |
+| Atualizar | Quando sai versão nova, aparece **Atualizar para…** no menu e nos Ajustes |
+| Ajustes | Abrir ao iniciar o Mac, sons, toque duplo, histórico, atualizações e quanto tempo o modelo fica na memória |
 
-Enquanto você fala, uma pílula discreta aparece embaixo, no centro da tela, com três barras que acompanham a sua voz.
+Enquanto você fala, uma pílula discreta aparece embaixo, no centro da tela, com três barras que acompanham a sua voz. No modo mãos livres ela lembra: "toque ⌥ para terminar". Por segurança, uma gravação mãos livres termina sozinha depois de 10 minutos.
 
 ## Como funciona
 
@@ -103,7 +107,7 @@ flowchart LR
 
 - O áudio nunca é salvo em disco e nunca sai do Mac.
 - O histórico guarda **só o texto** dos últimos 50 ditados, em `~/Library/Application Support/Tagara/history.json`, legível apenas pelo seu usuário. Dá para apagar ou desligar nos Ajustes.
-- O app não tem telemetria, conta nem servidor. A única conexão é o download do modelo de voz, uma vez, do Hugging Face.
+- O app não tem telemetria, conta nem servidor. As únicas conexões são o download do modelo de voz, uma vez, do Hugging Face, e a consulta às releases do Tagara no GitHub para saber se há versão nova (uma vez por dia, sem enviar nenhum dado seu; dá para desligar nos Ajustes).
 
 ## Compilar do código
 
@@ -138,6 +142,7 @@ Cada push na `main` roda os testes num runner `macos-26`, gera o DMG e publica u
 
 - Vocabulário próprio (nomes e termos técnicos como `kubectl`) com o *vocabulary boosting* do FluidAudio
 - Tecla de ditado configurável
+- Escolher o microfone nos Ajustes
 - Assinatura e notarização com Developer ID, para abrir sem aviso do macOS
 
 ## Contribuindo

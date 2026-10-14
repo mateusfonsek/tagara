@@ -18,6 +18,8 @@ final class AppController {
 
     private(set) var phase: Phase = .idle
     private(set) var level: Float = 0
+    /// True after a double tap on ⌥: recording continues until the next tap.
+    private(set) var handsFree = false
     private(set) var stats: UsageStats
     private(set) var hasMicrophone = Permissions.microphone
     private(set) var hasAccessibility = Permissions.accessibility
@@ -38,7 +40,16 @@ final class AppController {
         didSet { UserDefaults.standard.set(soundsEnabled, forKey: "soundsEnabled") }
     }
 
+    /// Double tap on ⌥ locks recording hands-free.
+    var handsFreeEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(handsFreeEnabled, forKey: "handsFreeEnabled")
+            hotkey.handsFreeEnabled = handsFreeEnabled
+        }
+    }
+
     let models = ModelManager()
+    let updater = Updater()
     /// Set by the SwiftUI layer, which owns window scenes.
     var openMainWindow: (() -> Void)?
 
@@ -51,12 +62,14 @@ final class AppController {
     private init() {
         soundsEnabled = UserDefaults.standard.object(forKey: "soundsEnabled") as? Bool ?? true
         historyEnabled = UserDefaults.standard.object(forKey: "historyEnabled") as? Bool ?? true
+        handsFreeEnabled = UserDefaults.standard.object(forKey: "handsFreeEnabled") as? Bool ?? true
         if let data = UserDefaults.standard.data(forKey: "stats"),
            let saved = try? JSONDecoder().decode(UsageStats.self, from: data) {
             stats = saved
         } else {
             stats = UsageStats()
         }
+        hotkey.handsFreeEnabled = handsFreeEnabled
         hotkey.onEvent = { [weak self] output in self?.handle(output) }
         recorder.onLevel = { [weak self] value in
             Task { @MainActor in self?.level = value }
@@ -67,6 +80,7 @@ final class AppController {
     var isReady: Bool { !needsSetup && hotkey.isRunning }
 
     func start() {
+        updater.schedule()
         refreshPermissions()
         if needsSetup { openMainWindow?() }
     }
@@ -123,6 +137,7 @@ final class AppController {
         case .press: beginRecording()
         case .release: finishRecording()
         case .cancel: cancelRecording()
+        case .lock: if phase == .recording { handsFree = true }
         }
     }
 
@@ -162,6 +177,7 @@ final class AppController {
             return
         }
         phase = .transcribing
+        handsFree = false
         level = 0
         Task {
             do {
@@ -190,6 +206,7 @@ final class AppController {
 
     private func endSession() {
         phase = .idle
+        handsFree = false
         level = 0
         overlay.hide()
     }

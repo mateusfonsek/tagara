@@ -33,6 +33,11 @@ struct HomeView: View {
                 Text("e fala. Quando soltar, o texto aparece onde estiver o cursor.")
             }
             .foregroundStyle(.secondary)
+            if controller.handsFreeEnabled {
+                Text("Para falar sem segurar, toque duas vezes no ⌥. Um toque termina.")
+                    .font(.callout)
+                    .foregroundStyle(.tertiary)
+            }
         }
     }
 

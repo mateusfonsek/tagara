@@ -80,6 +80,7 @@ As três barras do ícone são a marca em movimento:
 | Parado | três barras na proporção do ícone (0,48 · 1 · 0,48) | escondida |
 | Faltando configurar | as mesmas barras, apagadas | escondida |
 | Gravando | as barras seguem o volume da sua voz | barras ao vivo (a do meio em violeta) e "ouvindo…" |
+| Mãos livres (toque duplo) | as barras seguem a voz | barras ao vivo e "ouvindo… toque ⌥ para terminar" |
 | Escrevendo | três barras baixas e iguais | barras "respirando" em sequência e "escrevendo…" |
 | Aviso | barras apagadas | ícone de aviso em violeta claro e o texto na voz da marca |
 

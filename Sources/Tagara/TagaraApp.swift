@@ -64,6 +64,10 @@ private struct MenuContent: View {
     var body: some View {
         Text(controller.isReady ? "Pronto. Segura ⌥ direito e fala." : "Falta configurar")
         Divider()
+        if let version = controller.updater.availableVersion {
+            Button("Atualizar para \(version)…") { controller.updater.install() }
+            Divider()
+        }
         Button("Copiar último ditado") { controller.copyLastTranscript() }
             .disabled(controller.lastTranscript == nil && controller.history.entries.isEmpty)
         Button("Abrir Tagara…") { controller.openMainWindow?() }

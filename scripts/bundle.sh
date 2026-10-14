@@ -21,7 +21,10 @@ cp "$BIN" "$APP/Contents/MacOS/Tagara"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 if [ -n "${VERSION:-}" ]; then
     plutil -replace CFBundleShortVersionString -string "$VERSION" "$APP/Contents/Info.plist"
-    plutil -replace CFBundleVersion -string "${VERSION##*.}" "$APP/Contents/Info.plist"
+    # CFBundleVersion must stay numeric; "dev" builds keep the one from Info.plist.
+    if [[ "${VERSION##*.}" =~ ^[0-9]+$ ]]; then
+        plutil -replace CFBundleVersion -string "${VERSION##*.}" "$APP/Contents/Info.plist"
+    fi
 fi
 
 # Liquid Glass icon from Icon Composer plus the brand accent color, compiled into Assets.car

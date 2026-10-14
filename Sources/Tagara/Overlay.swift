@@ -48,7 +48,8 @@ private struct OverlayView: View {
             switch controller.phase {
             case .recording:
                 PillBars(bars: VoiceBars(level: Double(controller.level)))
-                Text("ouvindo…").foregroundStyle(Brand.sobreGrafite.opacity(0.85))
+                Text(controller.handsFree ? "ouvindo… toque ⌥ para terminar" : "ouvindo…")
+                    .foregroundStyle(Brand.sobreGrafite.opacity(0.85))
             case .transcribing:
                 ThinkingBars()
                 Text("escrevendo…").foregroundStyle(Brand.sobreGrafite.opacity(0.85))
