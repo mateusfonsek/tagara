@@ -40,7 +40,7 @@ export interface Strings {
     requirements: string;
     demoDescription: string;
   };
-  copy: { label: string; done: string; failed: string };
+  copy: { label: string; done: string; failed: string; failedTouch: string };
   demo: { listening: string; typing: string; scenes: DemoScene[] };
   how: { title: string; lead: string; steps: { title: string; text: string }[]; result: string };
   features: {

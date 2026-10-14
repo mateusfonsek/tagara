@@ -114,8 +114,11 @@ const scenes = s.demo.scenes;
       frame = requestAnimationFrame(tick);
     };
 
+    let stopped = false;
+
     const update = () => {
-      const run = onScreen && !document.hidden;
+      const run = onScreen && !document.hidden && !stopped;
+      root.toggleAttribute('data-running', run);
       if (run && !frame) {
         last = undefined;
         frame = requestAnimationFrame(tick);
@@ -130,6 +133,17 @@ const scenes = s.demo.scenes;
       update();
     }).observe(root);
     document.addEventListener('visibilitychange', update);
+
+    // Reduced motion switched on mid-visit: stop and go back to the static frame.
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {
+      if (!event.matches) return;
+      stopped = true;
+      update();
+      root.dataset.phase = 'done';
+      scenes.forEach((el, i) => el.classList.toggle('is-active', i === 0));
+      captions.forEach((el, i) => el.classList.toggle('is-active', i === 0));
+    });
+
     render(0);
   }
 </script>
@@ -212,13 +226,14 @@ const scenes = s.demo.scenes;
     padding: 1.25em 1.5em;
   }
 
-  /* Text appears all at once after the key is released, like the app's paste. */
+  /* Text appears all at once after the key is released, like the app's paste. Until then it
+     takes no space, so the cursor blinks where the text will start. */
   .demo__typed {
-    opacity: 0;
+    display: none;
   }
 
   .demo[data-phase='done'] .demo__scene.is-active .demo__typed {
-    opacity: 1;
+    display: inline;
   }
 
   .demo__cursor {
@@ -356,6 +371,13 @@ const scenes = s.demo.scenes;
     box-shadow:
       0 0 0 1px rgb(241 244 236 / 0.16),
       0 8px 24px rgb(0 0 0 / 0.22);
+  }
+
+  /* The bars only move while the pill is on screen and the demo is playing. */
+  .demo:not([data-running]) .demo__pill :global(.pill__bars i),
+  .demo[data-phase='idle'] .demo__pill :global(.pill__bars i),
+  .demo[data-phase='done'] .demo__pill :global(.pill__bars i) {
+    animation-play-state: paused;
   }
 
   .demo[data-phase='listening'] .demo__pill,

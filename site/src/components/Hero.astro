@@ -17,7 +17,7 @@ const { s } = Astro.props;
       <p class="hero__subtitle" data-reveal style="--delay: 100ms">{s.hero.subtitle}</p>
       <div class="hero__actions" data-reveal style="--delay: 200ms">
         <DownloadButton label={s.hero.download} versionTemplate={s.hero.downloadVersion} size="lg" />
-        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} />
+        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} failedTouch={s.copy.failedTouch} />
       </div>
       <p class="hero__requirements" data-reveal style="--delay: 300ms">{s.hero.requirements}</p>
     </div>
@@ -75,7 +75,8 @@ const { s } = Astro.props;
   }
 
   .hero__requirements {
-    margin-top: 2.25rem;
+    /* Room for the copy fallback hint, which can wrap to two lines on phones. */
+    margin-top: 3.25rem;
     font-size: 0.875rem;
     color: var(--text-muted);
   }

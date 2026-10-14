@@ -29,7 +29,7 @@ export const pt: Strings = {
     demoDescription:
       'Demonstração: a pessoa segura a tecla Option da direita, fala, e o texto aparece num terminal, num chat e num e-mail.',
   },
-  copy: { label: 'Copiar', done: 'Copiado!', failed: 'Selecionei pra você, é só ⌘C.' },
+  copy: { label: 'Copiar', done: 'Copiado!', failed: 'Selecionei pra você, é só ⌘C.', failedTouch: 'Selecionei pra você, é só copiar.' },
   demo: {
     listening: 'ouvindo…',
     typing: 'escrevendo…',

@@ -4,12 +4,14 @@ interface Props {
   label: string;
   done: string;
   failed: string;
+  /** Same hint without the ⌘C shortcut, for phones and tablets. */
+  failedTouch: string;
 }
-const { command, label, done, failed } = Astro.props;
+const { command, label, done, failed, failedTouch } = Astro.props;
 ---
 <div class="copy" data-copy-box>
   <code class="copy__code"><span class="copy__prompt" aria-hidden="true">$ </span><span data-copy-text>{command}</span></code>
-  <button class="copy__button" type="button" data-copy data-done={done} data-failed={failed}>{label}</button>
+  <button class="copy__button" type="button" data-copy data-done={done} data-failed={failed} data-failed-touch={failedTouch}>{label}</button>
   <span class="copy__status" role="status" data-copy-status></span>
 </div>
 
@@ -35,7 +37,8 @@ const { command, label, done, failed } = Astro.props;
         const selection = window.getSelection();
         selection?.removeAllRanges();
         selection?.addRange(range);
-        status.textContent = button.dataset.failed ?? '';
+        const touch = window.matchMedia('(pointer: coarse)').matches;
+        status.textContent = (touch ? button.dataset.failedTouch : button.dataset.failed) ?? '';
       }
       window.clearTimeout(reset);
       reset = window.setTimeout(() => {

@@ -23,7 +23,7 @@ const output = [
       <h2 class="section-title" data-reveal>{s.devs.title}</h2>
       <p class="lead" data-reveal style="--delay: 80ms">{s.devs.lead}</p>
       <div class="devs__copy" data-reveal style="--delay: 160ms">
-        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} />
+        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} failedTouch={s.copy.failedTouch} />
         <p class="devs__note">{s.devs.installNote}</p>
       </div>
       <p class="devs__links" data-reveal style="--delay: 220ms">
@@ -67,7 +67,8 @@ const output = [
   }
 
   .devs__note {
-    margin-top: 2.25rem;
+    /* Room for the copy fallback hint, which can wrap to two lines on phones. */
+    margin-top: 3.25rem;
     font-size: 0.9375rem;
     color: var(--text-muted);
   }
@@ -132,11 +133,18 @@ const output = [
     padding-bottom: 4rem;
   }
 
+  /* Final state is the default (pill gone), so without JS the prompt shows on its own. */
   .devs__pill {
     position: absolute;
     left: 50%;
     bottom: 0.9rem;
-    transform: translateX(-50%);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  /* A few breaths, enough to cover the time on screen; then the bars stop. */
+  .devs__claude .devs__pill :global(.pill__bars i) {
+    animation-iteration-count: 3;
   }
 
   /* the pill finishes "typing…", leaves, and the prompt lands */
@@ -155,6 +163,10 @@ const output = [
   }
 
   @keyframes tg-leave {
+    from {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
     to {
       opacity: 0;
       transform: translate(-50%, 8px);

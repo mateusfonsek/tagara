@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL;
     <p class="lead closing__text" data-reveal style="--delay: 140ms">{s.closing.text}</p>
     <div class="closing__actions" data-reveal style="--delay: 200ms">
       <DownloadButton label={s.hero.download} versionTemplate={s.hero.downloadVersion} size="lg" />
-      <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} />
+      <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} failedTouch={s.copy.failedTouch} />
     </div>
   </div>
 </section>
@@ -54,7 +54,7 @@ const base = import.meta.env.BASE_URL;
     gap: 0.875rem;
     width: min(100%, 30rem);
     margin-top: 2rem;
-    padding-bottom: 1.5rem;
+    padding-bottom: 3rem;
   }
 
   .closing__actions > :global(.copy) {

@@ -29,7 +29,7 @@ export const en: Strings = {
     demoDescription:
       'Demo: someone holds the right Option key, speaks, and the text appears in a terminal, a chat and an email.',
   },
-  copy: { label: 'Copy', done: 'Copied!', failed: 'Selected it for you, just press ⌘C.' },
+  copy: { label: 'Copy', done: 'Copied!', failed: 'Selected it for you, just press ⌘C.', failedTouch: 'Selected it for you, just copy it.' },
   demo: {
     listening: 'listening…',
     typing: 'typing…',
