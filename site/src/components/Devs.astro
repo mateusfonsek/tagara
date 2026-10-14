@@ -1,0 +1,161 @@
+---
+import CopyCommand from './CopyCommand.astro';
+import Pill from './Pill.astro';
+import type { Strings } from '../i18n/types';
+import { BUILD_DOCS_URL, INSTALL_COMMAND, REPO_URL } from '../lib/constants';
+
+interface Props {
+  s: Strings;
+}
+const { s } = Astro.props;
+// What scripts/get.sh prints (it speaks Portuguese in both languages).
+const output = [
+  'Procurando a versão mais recente…',
+  'Baixando Tagara-0.1.3.dmg…',
+  '######################################## 100.0%',
+  'Instalando em /Applications…',
+  'Pronto! Abrindo o Tagara.',
+];
+---
+<section class="section devs">
+  <div class="container devs__inner">
+    <div>
+      <h2 class="section-title" data-reveal>{s.devs.title}</h2>
+      <p class="lead" data-reveal style="--delay: 80ms">{s.devs.lead}</p>
+      <div class="devs__copy" data-reveal style="--delay: 160ms">
+        <CopyCommand command={INSTALL_COMMAND} label={s.copy.label} done={s.copy.done} failed={s.copy.failed} />
+        <p class="devs__note">{s.devs.installNote}</p>
+      </div>
+      <p class="devs__links" data-reveal style="--delay: 220ms">
+        <a href={REPO_URL}>{s.devs.source} →</a>
+        <a href={BUILD_DOCS_URL}>{s.devs.build} →</a>
+      </p>
+    </div>
+
+    <div class="devs__screens" aria-hidden="true">
+      <div class="devs__terminal" data-reveal style="--delay: 120ms">
+        <p class="devs__line" style="--i: 0"><span class="devs__prompt">$</span> {INSTALL_COMMAND}</p>
+        {output.map((line, i) => <p class="devs__line devs__line--out" style={`--i: ${i + 1}`}>{line}</p>)}
+      </div>
+      <div class="devs__claude" data-reveal style="--delay: 240ms">
+        <p class="devs__banner">✻ Claude Code</p>
+        <p class="devs__input"><span class="devs__chevron">&gt;</span> <span class="devs__typed">{s.devs.claudePrompt}</span></p>
+        <div class="devs__pill"><Pill listening={s.demo.listening} typing={s.demo.typing} state="typing" /></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .devs__inner {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+    align-items: center;
+  }
+
+  @media (min-width: 960px) {
+    .devs__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    }
+  }
+
+  .devs__copy {
+    margin-top: 2rem;
+    max-width: 30rem;
+  }
+
+  .devs__note {
+    margin-top: 2.25rem;
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+  }
+
+  .devs__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    font-weight: 650;
+  }
+
+  .devs__screens {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .devs__terminal,
+  .devs__claude {
+    padding: 1.25rem 1.4rem;
+    border-radius: 14px;
+    background: var(--tg-grafite);
+    color: var(--tg-sobre-grafite);
+    font-family: var(--tg-font-transcricao);
+    font-size: 0.875rem;
+    line-height: 1.75;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .devs__line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .devs__line--out {
+    color: #b9c0b1;
+  }
+
+  .devs__terminal.is-visible .devs__line {
+    animation: tg-line 0.25s var(--ease) both;
+    animation-delay: calc(0.4s + var(--i) * 0.45s);
+  }
+
+  .devs__prompt,
+  .devs__chevron {
+    color: var(--tg-violeta-claro);
+  }
+
+  .devs__banner {
+    color: var(--tg-violeta-claro);
+  }
+
+  .devs__input {
+    margin-top: 0.75rem;
+  }
+
+  .devs__claude {
+    position: relative;
+    padding-bottom: 4rem;
+  }
+
+  .devs__pill {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    transform: translateX(-50%);
+  }
+
+  /* the pill finishes "typing…", leaves, and the prompt lands */
+  .devs__claude.is-visible .devs__pill {
+    animation: tg-leave 0.3s var(--ease) 1.6s both;
+  }
+
+  .devs__claude.is-visible .devs__typed {
+    animation: tg-line 0.2s var(--ease) 1.8s both;
+  }
+
+  @keyframes tg-line {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes tg-leave {
+    to {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+  }
+</style>
